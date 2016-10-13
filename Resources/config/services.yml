@@ -1,9 +1,9 @@
 services:
-    payment.service.factory:
+    yamilovs.payment.factory:
         class: Yamilovs\PaymentBundle\Manager\PaymentFactory
-        arguments: ["%payment.services.default%"]
+        arguments: ["%yamilovs_payment.services.default%"]
 
-    payment.service.abstract:
+    yamilovs.payment.abstract:
         abstract: true
         calls:
             - [setLogger, [@logger]]
@@ -12,15 +12,15 @@ services:
         tags:
             - { name: monolog.logger, channel: payment }
 
-    payment.service.platron:
+    yamilovs.payment.platron:
         class: Yamilovs\PaymentBundle\Manager\PaymentServicePlatron
-        parent: payment.service.abstract
+        parent: yamilovs.payment.abstract
         public: false
         arguments:
-            - "%payment.services.platron.hostname%"
-            - "%payment.services.platron.merchant_id%"
-            - "%payment.services.platron.secret_key%"
-            - "%payment.services.platron.salt%"
-            - "%payment.services.platron.api_url_init%"
+            - "%yamilovs_payment.services.platron.hostname%"
+            - "%yamilovs_payment.services.platron.merchant_id%"
+            - "%yamilovs_payment.services.platron.secret_key%"
+            - "%yamilovs_payment.services.platron.salt%"
+            - "%yamilovs_payment.services.platron.api_url_init%"
         tags:
-            - { name: PaymentService }
+            - { name: YamilovsPaymentService }

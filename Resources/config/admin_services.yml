@@ -9,4 +9,4 @@ services:
             - ~
         calls:
             - [ setTranslationDomain, [admin]]
-            - [ setPayments, ["@payment.service.factory"]]
+            - [ setPayments, ["@yamilovs.payment.factory"]]

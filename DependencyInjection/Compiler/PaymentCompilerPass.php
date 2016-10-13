@@ -10,11 +10,11 @@ class PaymentCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('payment.service.factory')) {
+        if (!$container->has('yamilovs.payment.factory')) {
             return;
         }
-        $definition = $container->findDefinition('payment.service.factory');
-        $taggedServices = $container->findTaggedServiceIds('PaymentService');
+        $definition = $container->findDefinition('yamilovs.payment.factory');
+        $taggedServices = $container->findTaggedServiceIds('YamilovsPaymentService');
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('setPaymentService', [new Reference($id)]);
         }
