@@ -37,6 +37,16 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('products')
+                    ->prototype('array')
+                        ->children()
+                            ->scalarNode('name')->end()
+                            ->integerNode('type')->end()
+                            ->scalarNode('class')->end()
+                            ->scalarNode('primaryKey')->defaultValue('id')->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end()
         ;
 

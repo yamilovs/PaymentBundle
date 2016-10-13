@@ -9,6 +9,12 @@ Yamilovs\PaymentBundle\Entity\Purchase:
             generator:
                 strategy: AUTO
 
+    fields:
+        productType:
+            type: integer
+        productId:
+            type: integer
+
     oneToMany:
         payments:
             orderBy: { 'ordering': 'ASC' }

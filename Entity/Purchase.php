@@ -12,7 +12,14 @@ class Purchase
      */
     private $id;
 
+    private $productType;
 
+    private $productId;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $payments;
     /**
      * Get id
      *
@@ -22,10 +29,44 @@ class Purchase
     {
         return $this->id;
     }
+
     /**
-     * @var \Doctrine\Common\Collections\Collection
+     * @return mixed
      */
-    private $payments;
+    public function getProductId()
+    {
+        return $this->productId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProductType()
+    {
+        return $this->productType;
+    }
+
+    /**
+     * @param $productId
+     * @return $this
+     */
+    public function setProductId($productId)
+    {
+        $this->productId = $productId;
+
+        return $this;
+    }
+
+    /**
+     * @param $productType
+     * @return $this
+     */
+    public function setProductType($productType)
+    {
+        $this->productType = $productType;
+
+        return $this;
+    }
 
     /**
      * Constructor

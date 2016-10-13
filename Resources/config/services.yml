@@ -24,3 +24,8 @@ services:
             - "%yamilovs_payment.services.platron.api_url_init%"
         tags:
             - { name: YamilovsPaymentService }
+
+
+    yamilovs.purchase:
+        class: Yamilovs\PaymentBundle\Manager\PurchaseManager
+        arguments: ["@doctrine.orm.entity_manager", "%yamilovs_payment.products%"]
