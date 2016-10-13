@@ -6,7 +6,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Yamilovs\PaymentBundle\DependencyInjection\Compiler\PaymentCompilerPass;
 
-class PaymentBundle extends Bundle
+class YamilovsPaymentBundle extends Bundle
 {
     public function build(ContainerBuilder $container)
     {
