@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Manager;
+namespace Yamilovs\PaymentBundle\Manager;
 
 class PaymentServiceNotFountException extends \InvalidArgumentException
 {

@@ -1,13 +1,13 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Manager;
+namespace Yamilovs\PaymentBundle\Manager;
 
 use anlutro\cURL\cURL;
-use ProfiTravel\PaymentBundle\Entity\Payment;
-use ProfiTravel\PaymentBundle\Event\PaymentCheckEvent;
-use ProfiTravel\PaymentBundle\Event\PaymentRefundEvent;
-use ProfiTravel\PaymentBundle\Event\PaymentResultFailureEvent;
-use ProfiTravel\PaymentBundle\Event\PaymentResultSuccessEvent;
+use Yamilovs\PaymentBundle\Entity\Payment;
+use Yamilovs\PaymentBundle\Event\PaymentCheckEvent;
+use Yamilovs\PaymentBundle\Event\PaymentRefundEvent;
+use Yamilovs\PaymentBundle\Event\PaymentResultFailureEvent;
+use Yamilovs\PaymentBundle\Event\PaymentResultSuccessEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentServiceInterface

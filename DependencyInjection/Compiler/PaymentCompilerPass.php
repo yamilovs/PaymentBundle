@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\DependencyInjection\Compiler;
+namespace Yamilovs\PaymentBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;

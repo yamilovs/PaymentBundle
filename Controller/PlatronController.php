@@ -1,18 +1,18 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Controller;
+namespace Yamilovs\PaymentBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use ProfiTravel\PaymentBundle\Component\HttpFoundation\XmlResponse;
+use Yamilovs\PaymentBundle\Component\HttpFoundation\XmlResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use ProfiTravel\PaymentBundle\Manager\PaymentServicePlatron;
+use Yamilovs\PaymentBundle\Manager\PaymentServicePlatron;
 
 /**
  * Class TourCardController
  * @Route("/platron")
- * @package ProfiTravel\PaymentBundle\Controller
+ * @package Yamilovs\PaymentBundle\Controller
  */
 class PlatronController extends Controller
 {

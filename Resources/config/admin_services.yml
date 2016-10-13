@@ -1,11 +1,11 @@
 services:
     sonata.admin.tour:
-        class: ProfiTravel\PaymentBundle\Admin\PaymentAdmin
+        class: Yamilovs\PaymentBundle\Admin\PaymentAdmin
         tags:
             - { name: sonata.admin, manager_type: orm, group: "Платежи", label: "Список" }
         arguments:
             - ~
-            - ProfiTravel\PaymentBundle\Entity\Payment
+            - Yamilovs\PaymentBundle\Entity\Payment
             - ~
         calls:
             - [ setTranslationDomain, [admin]]

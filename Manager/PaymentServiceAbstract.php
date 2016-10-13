@@ -1,12 +1,12 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Manager;
+namespace Yamilovs\PaymentBundle\Manager;
 
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Doctrine\ORM\EntityManagerInterface;
-use ProfiTravel\PaymentBundle\Entity\Payment;
-use ProfiTravel\PaymentBundle\Entity\Purchase;
+use Yamilovs\PaymentBundle\Entity\Payment;
+use Yamilovs\PaymentBundle\Entity\Purchase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 

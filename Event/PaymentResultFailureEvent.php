@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Event;
+namespace Yamilovs\PaymentBundle\Event;
 
 class PaymentResultFailureEvent extends PaymentEventAbstract
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Event;
+namespace Yamilovs\PaymentBundle\Event;
 
 use Symfony\Component\EventDispatcher\Event;
-use ProfiTravel\PaymentBundle\Entity\Payment;
+use Yamilovs\PaymentBundle\Entity\Payment;
 
 abstract class PaymentEventAbstract extends Event
 {

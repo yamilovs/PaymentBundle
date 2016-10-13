@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\DependencyInjection;
+namespace Yamilovs\PaymentBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;

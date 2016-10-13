@@ -1,10 +1,10 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle;
+namespace Yamilovs\PaymentBundle;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use ProfiTravel\PaymentBundle\DependencyInjection\Compiler\PaymentCompilerPass;
+use Yamilovs\PaymentBundle\DependencyInjection\Compiler\PaymentCompilerPass;
 
 class PaymentBundle extends Bundle
 {

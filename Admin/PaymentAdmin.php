@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Admin;
+namespace Yamilovs\PaymentBundle\Admin;
 
 use Imagine\Filter\Basic\Copy;
 use ProfiTravel\NasheTravelBundle\Entity\Article;
@@ -15,8 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use ProfiTravel\PaymentBundle\Entity\Payment;
-use ProfiTravel\PaymentBundle\Manager\PaymentFactory;
+use Yamilovs\PaymentBundle\Entity\Payment;
+use Yamilovs\PaymentBundle\Manager\PaymentFactory;
 
 
 class PaymentAdmin extends AbstractAdmin

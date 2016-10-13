@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Component\HttpFoundation;
+namespace Yamilovs\PaymentBundle\Component\HttpFoundation;
 
 use Symfony\Component\HttpFoundation\Response;
 

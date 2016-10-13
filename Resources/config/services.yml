@@ -1,6 +1,6 @@
 services:
     payment.service.factory:
-        class: ProfiTravel\PaymentBundle\Manager\PaymentFactory
+        class: Yamilovs\PaymentBundle\Manager\PaymentFactory
         arguments: ["%payment.services.default%"]
 
     payment.service.abstract:
@@ -13,7 +13,7 @@ services:
             - { name: monolog.logger, channel: payment }
 
     payment.service.platron:
-        class: ProfiTravel\PaymentBundle\Manager\PaymentServicePlatron
+        class: Yamilovs\PaymentBundle\Manager\PaymentServicePlatron
         parent: payment.service.abstract
         public: false
         arguments:

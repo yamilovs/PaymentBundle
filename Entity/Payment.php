@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Entity;
+namespace Yamilovs\PaymentBundle\Entity;
 
 /**
  * Payment
@@ -241,18 +241,18 @@ class Payment
     }
 
     /**
-     * @var \ProfiTravel\PaymentBundle\Entity\Purchase
+     * @var \Yamilovs\PaymentBundle\Entity\Purchase
      */
     private $purchase;
 
     /**
      * Set purchase
      *
-     * @param \ProfiTravel\PaymentBundle\Entity\Purchase $purchase
+     * @param \Yamilovs\PaymentBundle\Entity\Purchase $purchase
      *
      * @return Payment
      */
-    public function setPurchase(\ProfiTravel\PaymentBundle\Entity\Purchase $purchase = null)
+    public function setPurchase(\Yamilovs\PaymentBundle\Entity\Purchase $purchase = null)
     {
         $this->purchase = $purchase;
 
@@ -262,7 +262,7 @@ class Payment
     /**
      * Get purchase
      *
-     * @return \ProfiTravel\PaymentBundle\Entity\Purchase
+     * @return \Yamilovs\PaymentBundle\Entity\Purchase
      */
     public function getPurchase()
     {

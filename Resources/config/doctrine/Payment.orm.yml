@@ -1,7 +1,7 @@
-ProfiTravel\PaymentBundle\Entity\Payment:
+Yamilovs\PaymentBundle\Entity\Payment:
     type: entity
     table: null
-    repositoryClass: ProfiTravel\PaymentBundle\Repository\PaymentRepository
+    repositoryClass: Yamilovs\PaymentBundle\Repository\PaymentRepository
     id:
         id:
             type: integer

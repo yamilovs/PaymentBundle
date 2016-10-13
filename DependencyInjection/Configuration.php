@@ -1,10 +1,10 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\DependencyInjection;
+namespace Yamilovs\PaymentBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use ProfiTravel\PaymentBundle\Manager\PaymentFactory;
+use Yamilovs\PaymentBundle\Manager\PaymentFactory;
 
 /**
  * This is the class that validates and merges configuration from your app/config files.

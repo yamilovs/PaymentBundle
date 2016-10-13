@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Entity;
+namespace Yamilovs\PaymentBundle\Entity;
 
 /**
  * Purchase
@@ -38,11 +38,11 @@ class Purchase
     /**
      * Add payment
      *
-     * @param \ProfiTravel\PaymentBundle\Entity\Payment $payment
+     * @param \Yamilovs\PaymentBundle\Entity\Payment $payment
      *
      * @return Purchase
      */
-    public function addPayment(\ProfiTravel\PaymentBundle\Entity\Payment $payment)
+    public function addPayment(\Yamilovs\PaymentBundle\Entity\Payment $payment)
     {
         $this->payments[] = $payment;
 
@@ -52,9 +52,9 @@ class Purchase
     /**
      * Remove payment
      *
-     * @param \ProfiTravel\PaymentBundle\Entity\Payment $payment
+     * @param \Yamilovs\PaymentBundle\Entity\Payment $payment
      */
-    public function removePayment(\ProfiTravel\PaymentBundle\Entity\Payment $payment)
+    public function removePayment(\Yamilovs\PaymentBundle\Entity\Payment $payment)
     {
         $this->payments->removeElement($payment);
     }

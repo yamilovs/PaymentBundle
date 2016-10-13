@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfiTravel\PaymentBundle\Repository;
+namespace Yamilovs\PaymentBundle\Repository;
 
 /**
  * PaymentRepository
