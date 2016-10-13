@@ -9,8 +9,8 @@
             "email": "artemklv@yandex.ru"
         },
         {
-			"name" : "Yamilov Stepan",
-			"email" : "yamilovs@gmail.com"
+            "name" : "Yamilov Stepan",
+            "email" : "yamilovs@gmail.com"
         }
     ],
     "keywords" : [
@@ -22,8 +22,12 @@
     "require" : {
         "php": ">=5.5.9",
         "lib-curl": "^7.0",
-        "anlutro/curl": "^1.4",
-        "symfony/framework-bundle": "~2.7|~3.0"
+        "anlutro/curl": "^1.4"
+    },
+    "require-dev" : {
+        "symfony/framework-bundle": "~2.7|~3.0",
+        "symfony/monolog-bundle": "^2.8",
+        "doctrine/orm": "^2.5"
     },
     "autoload" : {
         "psr-4" : {
