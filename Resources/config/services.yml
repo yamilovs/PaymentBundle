@@ -1,0 +1,26 @@
+services:
+    payment.service.factory:
+        class: ProfiTravel\PaymentBundle\Manager\PaymentFactory
+        arguments: ["%payment.services.default%"]
+
+    payment.service.abstract:
+        abstract: true
+        calls:
+            - [setLogger, [@logger]]
+            - [setEntityManager, [@doctrine.orm.entity_manager]]
+            - [setEventDispatcher, [@event_dispatcher]]
+        tags:
+            - { name: monolog.logger, channel: payment }
+
+    payment.service.platron:
+        class: ProfiTravel\PaymentBundle\Manager\PaymentServicePlatron
+        parent: payment.service.abstract
+        public: false
+        arguments:
+            - "%payment.services.platron.hostname%"
+            - "%payment.services.platron.merchant_id%"
+            - "%payment.services.platron.secret_key%"
+            - "%payment.services.platron.salt%"
+            - "%payment.services.platron.api_url_init%"
+        tags:
+            - { name: PaymentService }

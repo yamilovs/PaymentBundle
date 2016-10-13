@@ -1,0 +1,49 @@
+ProfiTravel\PaymentBundle\Entity\Payment:
+    type: entity
+    table: null
+    repositoryClass: ProfiTravel\PaymentBundle\Repository\PaymentRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        paymentType:
+            type: string
+            length: 255
+        paymentId:
+            type: string
+            length: 255
+        status:
+            type: integer
+        invoiceSum:
+            type: decimal
+            precision: 10
+            scale: '2'
+        paidSum:
+            type: decimal
+            precision: 10
+            scale: '2'
+            nullable: true
+        sysInfo:
+            type: text
+            nullable: true
+        createdAt:
+            type: datetime
+        updatedAt:
+            type: datetime
+            nullable: true
+
+    manyToOne:
+        purchase:
+            targetEntity: Purchase
+            joinColumn:
+                name: purchase_id
+                referencedColumnName: id
+
+    lifecycleCallbacks:
+        prePersist: [ prePersist ]
+        preUpdate: [ preUpdate ]
+
+

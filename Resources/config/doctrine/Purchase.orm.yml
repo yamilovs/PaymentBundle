@@ -1,0 +1,18 @@
+ProfiTravel\PaymentBundle\Entity\Purchase:
+    type: entity
+    table: null
+    repositoryClass: ProfiTravel\PaymentBundle\Repository\PurchaseRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+
+    oneToMany:
+        payments:
+            orderBy: { 'ordering': 'ASC' }
+            targetEntity: Payment
+            mappedBy: purchase
+
+    lifecycleCallbacks: {  }
