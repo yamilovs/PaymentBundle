@@ -1,0 +1,33 @@
+{
+    "name" : "yamilovs/payment-bundle",
+    "description" : "Symfony bundle for online payments.",
+    "homepage": "https://github.com/yamilovs/PaymentBundle",
+    "type" : "symfony-bundle",
+    "authors": [
+        {
+            "name": "Klevakin Artem",
+            "email": "artemklv@yandex.ru"
+        },
+        {
+			"name" : "Yamilov Stepan",
+			"email" : "yamilovs@gmail.com"
+        }
+    ],
+    "keywords" : [
+        "Payment"
+    ],
+    "license" : [
+        "MIT"
+    ],
+    "require" : {
+        "php": ">=5.5.9",
+        "lib-curl": "^7.0",
+        "anlutro/curl": "^1.4",
+        "symfony/framework-bundle": "~2.7|~3.0"
+    },
+    "autoload" : {
+        "psr-4" : {
+            "Yamilovs\\PaymentBundle\\" : ""
+        }
+    }
+}
