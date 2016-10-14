@@ -1,0 +1,3 @@
+yamilovs_payment_platron:
+    resource: "@YamilovsPaymentBundle/Resources/config/routing/platron.yml"
+    prefix: /platron

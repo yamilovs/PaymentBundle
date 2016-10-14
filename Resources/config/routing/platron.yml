@@ -1,0 +1,24 @@
+yamilovs_payment_platron_check:
+    path: "/check"
+    defaults: { _controller: YamilovsPaymentBundle:Platron:check }
+    methods: ["POST"]
+
+yamilovs_payment_platron_result:
+    path: "/result"
+    defaults: { _controller: YamilovsPaymentBundle:Platron:result }
+    methods: ["POST"]
+
+yamilovs_payment_platron_refund:
+    path: "/refund"
+    defaults: { _controller: YamilovsPaymentBundle:Platron:refund }
+    methods: ["POST"]
+
+yamilovs_payment_platron_success:
+    path: "/success"
+    defaults: { _controller: YamilovsPaymentBundle:Platron:success }
+    methods: ["POST"]
+
+yamilovs_payment_platron_failure:
+    path: "/failure"
+    defaults: { _controller: YamilovsPaymentBundle:Platron:failure }
+    methods: ["POST"]

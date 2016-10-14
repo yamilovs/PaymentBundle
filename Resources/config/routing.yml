@@ -1,4 +1,0 @@
-payment:
-    resource: "@YamilovsPaymentBundle/Controller/"
-    prefix:   /payment
-    type:     annotation
