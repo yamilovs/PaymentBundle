@@ -1,12 +1,12 @@
 services:
-    sonata.admin.tour:
+    yamilovs.payment.sonata.admin.payment:
         class: Yamilovs\PaymentBundle\Admin\PaymentAdmin
         tags:
-            - { name: sonata.admin, manager_type: orm, group: "Платежи", label: "Список" }
+            - { name: sonata.admin, manager_type: orm, group: "yamilovs.payment.admin.payments_group", label: "yamilovs.payment.admin.payments_label" }
         arguments:
             - ~
             - Yamilovs\PaymentBundle\Entity\Payment
             - ~
         calls:
-            - [ setTranslationDomain, [admin]]
+            - [ setTranslationDomain, ["SonataAdminBundle"]]
             - [ setPayments, ["@yamilovs.payment.factory"]]

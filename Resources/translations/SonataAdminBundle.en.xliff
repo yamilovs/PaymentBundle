@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="1">
+                <source>yamilovs.payment.admin.payments_group</source>
+                <target>Payments</target>
+            </trans-unit>
+            <trans-unit id="2">
+                <source>yamilovs.payment.admin.payments_label</source>
+                <target>List</target>
+            </trans-unit>
+            <trans-unit id="3">
+                <source>yamilovs.payment.admin.label.created_at</source>
+                <target>Created at</target>
+            </trans-unit>
+            <trans-unit id="4">
+                <source>yamilovs.payment.admin.label.updated_at</source>
+                <target>Updated at</target>
+            </trans-unit>
+            <trans-unit id="5">
+                <source>yamilovs.payment.admin.label.status</source>
+                <target>Status</target>
+            </trans-unit>
+            <trans-unit id="6">
+                <source>yamilovs.payment.admin.label.payment_type</source>
+                <target>Payment system</target>
+            </trans-unit>
+            <trans-unit id="7">
+                <source>yamilovs.payment.admin.label.payment_id</source>
+                <target>Invoice number</target>
+            </trans-unit>
+            <trans-unit id="8">
+                <source>yamilovs.payment.admin.label.purchase</source>
+                <target>Purchase</target>
+            </trans-unit>
+            <trans-unit id="9">
+                <source>yamilovs.payment.admin.label.invoice_sum</source>
+                <target>Invoice summary</target>
+            </trans-unit>
+            <trans-unit id="10">
+                <source>yamilovs.payment.admin.label.paid_sum</source>
+                <target>Paid summary</target>
+            </trans-unit>
+            <trans-unit id="11">
+                <source>yamilovs.payment.admin.with.information</source>
+                <target>Information</target>
+            </trans-unit>
+            <trans-unit id="12">
+                <source>yamilovs.payment.admin.with.data</source>
+                <target>Payment data</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
+
