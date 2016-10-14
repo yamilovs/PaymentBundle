@@ -27,7 +27,7 @@ class PlatronController extends Controller
     public function checkAction(Request $request)
     {
         /** @var PaymentServicePlatron $platron */
-        $manager = $this->get('payment.service.factory')->get(PaymentServicePlatron::ALIAS);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params = $request->request->all();
         // check signature
         $data = $manager->checkPayment($this->generateUrl('payment_platron_check'), $params);
@@ -45,7 +45,7 @@ class PlatronController extends Controller
     public function resultAction(Request $request)
     {
         /** @var PaymentServicePlatron $platron */
-        $manager = $this->get('payment.service.factory')->get(PaymentServicePlatron::ALIAS);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params = $request->request->all();
         // check signature
         $data = $manager->resultPayment($this->generateUrl('payment_platron_result'), $params);
@@ -63,7 +63,7 @@ class PlatronController extends Controller
     public function refundAction(Request $request)
     {
         /** @var PaymentServicePlatron $platron */
-        $manager = $this->get('payment.service.factory')->get(PaymentServicePlatron::ALIAS);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params = $request->request->all();
         // check signature
         $data = $manager->resultPayment($this->generateUrl('payment_platron_refund'), $params);
@@ -81,11 +81,11 @@ class PlatronController extends Controller
     public function successAction(Request $request)
     {
         /** @var PaymentServicePlatron $platron */
-        $manager = $this->get('payment.service.factory')->get(PaymentServicePlatron::ALIAS);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params = $request->request->all();
         // check signature
         $manager->successPayment($this->generateUrl('payment_platron_success'), $params);
-        return $this->render('PaymentBundle:Default:index.html.twig');
+        return $this->render('YamilovsPaymentBundle:Default:index.html.twig');
     }
 
     /**
@@ -98,11 +98,11 @@ class PlatronController extends Controller
      */
     public function failureAction(Request $request)
     {
-        $manager = $this->get('payment.service.factory')->get(PaymentServicePlatron::ALIAS);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params = $request->request->all();
         // check signature
         $manager->failurePayment($this->generateUrl('payment_platron_failure'), $params);
-        return $this->render('PaymentBundle:Default:index.html.twig');
+        return $this->render('YamilovsPaymentBundle:Default:index.html.twig');
     }
 
 }
