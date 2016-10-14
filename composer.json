@@ -26,8 +26,10 @@
     },
     "require-dev" : {
         "symfony/framework-bundle": "~2.7|~3.0",
+        "symfony/form": "~2.7|~3.0",
         "symfony/monolog-bundle": "^2.8",
-        "doctrine/orm": "^2.5"
+        "doctrine/orm": "^2.5",
+        "sonata-project/admin-bundle": "^3.0"
     },
     "autoload" : {
         "psr-4" : {
