@@ -42,7 +42,7 @@ abstract class PaymentServiceAbstract implements PaymentServiceInterface
     protected final function setPayment($sum, $paymentId, $purchaseId)
     {
         $purchase = $this->entityManager
-            ->getRepository('PaymentBundle:Purchase')
+            ->getRepository('YamilovsPaymentBundle:Purchase')
             ->find($purchaseId);
         if (!$purchase) {
             throw new PaymentServiceInvalidArgumentException("purchase id don't exists: " . $purchaseId);

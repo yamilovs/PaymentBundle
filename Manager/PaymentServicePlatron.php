@@ -54,6 +54,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $this->logger->info('platron getPayUrl', array_merge($data, $params));
             return $data['pg_redirect_url'];
         } catch (\Exception $e) {
+
             $this->logger->error($e->getMessage(), $params);
         }
     }
@@ -166,7 +167,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                     "required request param does not exists"
                 );
             }
-            $repo = $this->entityManager->getRepository('PaymentBundle:Payment');
+            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
             $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
             if ( !$payment ) {
                 throw new PaymentServiceInvalidArgumentException(
@@ -217,7 +218,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                     "required request param does not exists"
                 );
             }
-            $repo = $this->entityManager->getRepository('PaymentBundle:Payment');
+            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
             $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
             if ( !$payment ) {
                 throw new PaymentServiceInvalidArgumentException(
@@ -282,7 +283,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                     "required request param does not exists"
                 );
             }
-            $repo = $this->entityManager->getRepository('PaymentBundle:Payment');
+            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
             $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
             if ( !$payment ) {
                 throw new PaymentServiceInvalidArgumentException(
@@ -321,7 +322,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                     "required request param does not exists"
                 );
             }
-            $repo = $this->entityManager->getRepository('PaymentBundle:Payment');
+            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
             $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
             if ( !$payment ) {
                 throw new PaymentServiceInvalidArgumentException(
@@ -346,7 +347,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                     "required request param does not exists"
                 );
             }
-            $repo = $this->entityManager->getRepository('PaymentBundle:Payment');
+            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
             $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
             if ( !$payment ) {
                 throw new PaymentServiceInvalidArgumentException(
