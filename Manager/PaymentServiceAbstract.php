@@ -36,16 +36,6 @@ abstract class PaymentServiceAbstract implements PaymentServiceInterface
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    protected function writeErrorLog($message, $parameters)
-    {
-        $this->logger->error($message, $parameters);
-    }
-
-    protected function writeInfoLog($message, $parameters)
-    {
-        $this->logger->info($message, $parameters);
-    }
-
     /**
      * Check that parameters has all required ones
      * @param array $parameters

@@ -188,10 +188,10 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $data = $this->makeRequest($this->apiUrlInit, $normalizedParams);
             $this->checkSignature($this->apiUrlInit, $data);
             $this->setPayment($params['sum'], $data['pg_payment_id'], $params['purchase_id']);
-            $this->writeInfoLog("platron getPayUrl", array_merge($data, $params));
+            $this->logger->info("platron getPayUrl", array_merge($data, $params));
             return $data['pg_redirect_url'];
         } catch (\Exception $e) {
-            $this->writeErrorLog($e->getMessage(), $params);
+            $this->logger->error($e->getMessage(), $params);
         }
     }
 
@@ -263,7 +263,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $payment->setStatus(Payment::STATUS_WAIT_PAID);
             $this->entityManager->persist($payment);
             $this->entityManager->flush();
-            $this->writeInfoLog("checkPayment", $params);
+            $this->logger->info("checkPayment", $params);
         } catch (\Exception $e) {
             $this->logger->error( 'checkPayment: ' . $e->getMessage(), $params);
             $response = [
@@ -305,7 +305,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             ;
             $this->entityManager->persist($payment);
             $this->entityManager->flush();
-            $this->writeInfoLog("resultPayment", $params);
+            $this->logger->info("resultPayment", $params);
             $response = [
                 'pg_status' => 'ok',
                 'pg_description' =>'payment is accepted',
@@ -325,7 +325,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                 $this->entityManager->flush();
             }
             $response['pg_error_description'] = $e->getMessage();
-            $this->writeErrorLog("resultPayment: ".$e->getMessage(), $params);
+            $this->logger->error("resultPayment: ".$e->getMessage(), $params);
         }
         return $this->makeResponse($url, $response);
     }
@@ -352,13 +352,13 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                 $event = new PaymentRefundEvent($payment, $params);
                 $this->eventDispatcher->dispatch(PaymentRefundEvent::NAME, $event);
             }
-            $this->writeInfoLog("refundPayment", $params);
+            $this->logger->info("refundPayment", $params);
         } catch (\Exception $e) {
             $response = [
                 'pg_status' => 'error',
                 'pg_error_description' => $e->getMessage(),
             ];
-            $this->writeErrorLog("refundPayment: ".$e->getMessage(), $params);
+            $this->logger->error("refundPayment: ".$e->getMessage(), $params);
         }
         return $this->makeResponse($url, $response);
     }
@@ -376,7 +376,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $event = new PaymentResultSuccessEvent($payment, $params);
             $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->writeErrorLog("checkPaymentSuccess ".$e->getMessage(), $params);
+            $this->logger->error("checkPaymentSuccess ".$e->getMessage(), $params);
             throw new PaymentServiceInvalidArgumentException("requested payment had invalid params");
         }
     }
@@ -394,7 +394,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $event = new PaymentResultFailureEvent($payment, $params);
             $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->writeErrorLog("checkPaymentFailure ".$e->getMessage(), $params);
+            $this->logger->error("checkPaymentFailure ".$e->getMessage(), $params);
             throw new PaymentServiceInvalidArgumentException("requested payment had invalid params");
         }
     }
