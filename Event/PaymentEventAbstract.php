@@ -3,17 +3,20 @@
 namespace Yamilovs\PaymentBundle\Event;
 
 use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\HttpFoundation\Response;
 use Yamilovs\PaymentBundle\Entity\Payment;
 
 abstract class PaymentEventAbstract extends Event
 {
     protected $payment;
-    protected $request = [];
+    protected $request;
     protected $message = '';
+
 
     public function __construct(Payment $payment, array $request)
     {
         $this->payment = $payment;
+        $this->request = $request;
     }
 
     public function getPayment()
