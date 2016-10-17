@@ -11,6 +11,10 @@ abstract class PaymentServiceAbstract implements PaymentServiceInterface
 {
     /** @var Logger */
     protected $logger;
+    /** @var  EntityManager */
+    protected $entityManager;
+    /** @var  EventDispatcherInterface */
+    protected $eventDispatcher;
 
     public function __toString()
     {
@@ -64,10 +68,6 @@ abstract class PaymentServiceAbstract implements PaymentServiceInterface
 
 
     protected $paramsMapping = [];
-    /** @var  EntityManager */
-    protected $entityManager;
-    /** @var  EventDispatcher */
-    protected $eventDispatcher;
 
 
 
