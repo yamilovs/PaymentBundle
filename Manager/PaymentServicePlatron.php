@@ -10,7 +10,7 @@ use Yamilovs\PaymentBundle\Event\PaymentRefundEvent;
 use Yamilovs\PaymentBundle\Event\PaymentResultFailureEvent;
 use Yamilovs\PaymentBundle\Event\PaymentResultSuccessEvent;
 
-class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentServiceInterface
+class PaymentServicePlatron extends AbstractPaymentService implements PaymentServiceInterface
 {
     const ALIAS     = 'platron';
     const DELIMITER = ';';

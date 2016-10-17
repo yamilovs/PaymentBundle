@@ -7,7 +7,7 @@ use Monolog\Logger;
 use Yamilovs\PaymentBundle\Entity\Payment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-abstract class PaymentServiceAbstract implements PaymentServiceInterface
+abstract class AbstractPaymentService implements PaymentServiceInterface
 {
     /** @var Logger */
     protected $logger;
