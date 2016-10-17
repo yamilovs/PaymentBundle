@@ -5,7 +5,11 @@ namespace Yamilovs\PaymentBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Yamilovs\PaymentBundle\Component\HttpFoundation\XmlResponse;
+use Yamilovs\PaymentBundle\Event\PaymentControllerResultSuccessEvent;
 use Yamilovs\PaymentBundle\Manager\PaymentServicePlatron;
+use Yamilovs\PaymentBundle\Event\PaymentResultSuccessEvent;
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PlatronController extends Controller
 {
@@ -55,16 +59,30 @@ class PlatronController extends Controller
     }
 
     /**
-     * Url на который перенаправляется пользователь при удачном платеже
-     *
      * @param Request $request
+     * @return mixed
      */
     public function successAction(Request $request)
     {
         /** @var PaymentServicePlatron $manager */
         $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params     = $request->request->all();
-        $manager->successPayment($this->generateUrl('yamilovs_payment_platron_success'), $params);
+        $view = 'PaymentBundle:Platron:success.html.twig';
+        try {
+            $manager->checkPaymentSuccess($this->generateUrl('yamilovs_payment_platron_success'), $params);
+            $payment = $manager->getPaymentByParams($params);
+            $data = [ 'payment' => $payment ];
+            $event = new PaymentControllerResultSuccessEvent($payment);
+            $this->get('event_dispatcher')->dispatch(PaymentResultSuccessEvent::NAME, $event);
+            if ( $event->getResponse() ) {
+                return $event->getResponse();
+            }
+        } catch (\Exception $e) {
+            throw new NotFoundHttpException("Page not found");
+        }
+        $view = $event->getView() ?: $view;
+        $data = $event->getData() ?: $data;
+        return $this->render($view, $data);
     }
 
     /**
