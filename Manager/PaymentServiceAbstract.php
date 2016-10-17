@@ -5,7 +5,7 @@ namespace Yamilovs\PaymentBundle\Manager;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Yamilovs\PaymentBundle\Entity\Payment;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class PaymentServiceAbstract implements PaymentServiceInterface
 {
@@ -27,7 +27,7 @@ abstract class PaymentServiceAbstract implements PaymentServiceInterface
         $this->entityManager = $entityManager;
     }
 
-    public final function setEventDispatcher(EventDispatcher $eventDispatcher)
+    public final function setEventDispatcher(EventDispatcherInterface $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
     }
