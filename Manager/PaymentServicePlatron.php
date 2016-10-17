@@ -3,32 +3,23 @@
 namespace Yamilovs\PaymentBundle\Manager;
 
 use anlutro\cURL\cURL;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Yamilovs\PaymentBundle\Entity\Payment;
 use Yamilovs\PaymentBundle\Event\PaymentCheckEvent;
 use Yamilovs\PaymentBundle\Event\PaymentRefundEvent;
 use Yamilovs\PaymentBundle\Event\PaymentResultFailureEvent;
 use Yamilovs\PaymentBundle\Event\PaymentResultSuccessEvent;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentServiceInterface
 {
+    const ALIAS     = 'platron';
     const DELIMITER = ';';
-    const ALIAS = 'platron';
-    const PAYMENT_TIMEOUT = 300;
 
-    protected $hostname;
-    protected $merchantId;
-    protected $secretKey;
-    protected $salt;
-    protected $apiUrlInit;
-
-    protected $paramsMapping = [
-        'sum'               => 'pg_amount',
-        'purchase_id'       => 'pg_order_id',
-        'user_phone'        => 'pg_user_phone',
-        'user_mail'         => 'pg_user_mail',
-        'description'       => 'pg_description',
-    ];
+    protected $hostname;    // yamilovs_payment.services.platron.hostname
+    protected $merchantId;  // yamilovs_payment.services.platron.merchant_id
+    protected $secretKey;   // yamilovs_payment.services.platron.secret_key
+    protected $salt;        // yamilovs_payment.services.platron.salt
+    protected $apiUrlInit;  // yamilovs_payment.services.platron.api_url_init
 
     public function __construct($hostname, $merchantId, $secretKey, $salt, $apiUrlInit)
     {
@@ -38,11 +29,150 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
         $this->salt         = $salt;
         $this->apiUrlInit   = $apiUrlInit;
     }
-
+    
+    /**
+     * Return an alias of this payment service
+     * @return string
+     */
     public function getAlias()
     {
         return self::ALIAS;
     }
+
+    /**
+     * Check that payment request has all requred values
+     * @param array $requiredParameters
+     * @param array $parameters
+     * @throws PaymentServiceInvalidArgumentException
+     */
+    protected function checkRequiredParameters(array $requiredParameters, array $parameters)
+    {
+        if (array_diff($requiredParameters, array_keys($parameters)) ) {
+            throw new PaymentServiceInvalidArgumentException(
+                "Required parameters does not exists in request. Looking: ".implode(", ", $requiredParameters).", but got: ".implode(", ", array_keys($parameters))
+            );
+        }
+    }
+
+    /**
+     * Check that payment invoice amount is equal to expected invoice amount
+     * @param Payment $payment
+     * @param $invoiceSum
+     * @throws PaymentServiceInvalidArgumentException
+     */
+    protected function checkPaymentInvoiceSum(Payment $payment, $invoiceSum)
+    {
+        if ($payment->getInvoiceSum() != $invoiceSum) {
+            throw new PaymentServiceInvalidArgumentException(
+                "Payment invoice amount not equal to the expected amount"
+            );
+        }
+    }
+
+    /**
+     * Return payment object from database by it's id
+     * @param $paymentId
+     * @throws PaymentServiceInvalidArgumentException
+     * @return Payment
+     */
+    protected function getPaymentById($paymentId)
+    {
+        $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
+        $payment = $repo->find($paymentId);
+        if (!$payment) {
+            throw new PaymentServiceInvalidArgumentException(
+                "Payment with id '$paymentId' does not exists in database"
+            );
+        }
+        return $payment;
+    }
+
+    /**
+     * Create request salt based on request parameters
+     * @param array $params
+     * @return string
+     */
+    protected function generateSalt(array $params)
+    {
+        return substr(md5($this->implodeNestedArray($params).$this->salt), 0, 10);
+    }
+    
+    /**
+     * Return platron signature for response based on request parameters
+     * @param $url
+     * @param array $params
+     * @return string
+     */
+    protected function generateSignature($url, array $params)
+    {
+        if (strpos($url, '/') !== false) {
+            $url = substr($url, strrpos($url, '/') + 1);
+        }
+        return md5($url.self::DELIMITER.$this->implodeNestedArray($params).self::DELIMITER.$this->secretKey);
+    }
+
+    /**
+     * Recursively implode arrays with delimiter
+     * @param array $params
+     * @param string $delimiter
+     * @return string
+     */
+    protected function implodeNestedArray(array $params, $delimiter = self::DELIMITER)
+    {
+        $values = [];
+        ksort($params);
+        foreach($params as $param) {
+            $values[] = is_array($param) ? $this->implodeNestedArray($param) : $param;
+        }
+        return implode($values, $delimiter);
+    }
+
+    /**
+     * Return array of parameters for response
+     * @param $url
+     * @param $params
+     * @return array
+     */
+    protected function makeResponse($url, $params)
+    {
+        $params = array_merge(['pg_salt' => $this->generateSalt($params)], $params);
+        $params = array_merge(['pg_sig' => $this->generateSignature($url, $params)], $params);
+        return $params;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const PAYMENT_TIMEOUT = 300;
+
+
+    protected $paramsMapping = [
+        'sum'               => 'pg_amount',
+        'purchase_id'       => 'pg_order_id',
+        'user_phone'        => 'pg_user_phone',
+        'user_mail'         => 'pg_user_mail',
+        'description'       => 'pg_description',
+    ];
+
+    
+
+
 
     public function getPayUrl(array $params)
     {
@@ -51,60 +181,16 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $data = $this->makeRequest($this->apiUrlInit, $normalizedParams);
             $this->checkSignature($this->apiUrlInit, $data);
             $this->setPayment($params['sum'], $data['pg_payment_id'], $params['purchase_id']);
-            $this->logger->info('platron getPayUrl', array_merge($data, $params));
+            $this->writeInfoLog("platron getPayUrl", array_merge($data, $params));
             return $data['pg_redirect_url'];
         } catch (\Exception $e) {
-
-            $this->logger->error($e->getMessage(), $params);
+            $this->writeErrorLog($e->getMessage(), $params);
         }
     }
 
-    public function rejectPay(array $params)
-    {
-        // TODO: Implement rejectPay() method.
-    }
 
-    /**
-     * Make signature for platron api request
-     *
-     * @param $url
-     * @param array $params
-     * @return string
-     */
-    private final function generateSignature($url, array $params)
-    {
-        if (strpos($url, '/') !== false) {
-            $url = substr($url, strrpos($url, '/') + 1);
-        }
-        return md5($url . self::DELIMITER . $this->implodeNestedArray($params) . self::DELIMITER . $this->secretKey );
-    }
 
-    /**
-     * @param array $params
-     * @return string
-     */
-    private function generateSalt(array $params)
-    {
-        return substr(md5($this->implodeNestedArray($params) . $this->salt), 0, 10);
-    }
 
-    /**
-     * Join nested array
-     *
-     * @param array $params
-     * @param string $delimiter
-     * @return string
-     */
-    private function implodeNestedArray(array $params, $delimiter = self::DELIMITER)
-    {
-        ksort($params);
-        $values = [];
-        foreach( $params as $param ) {
-            $values[] = ( is_array($param) ? $this->implodeNestedArray($param) : $param );
-        }
-
-        return implode($values, $delimiter);
-    }
 
     /**
      * Make request to platron server and convert response to associative array
@@ -159,31 +245,21 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             'pg_timeout' => self::PAYMENT_TIMEOUT,
         ];
 
-        $requiredParams = ['pg_payment_id', 'pg_order_id', 'pg_amount'];
         try {
-             $this->checkSignature($url, $params);
-            if ( array_diff($requiredParams, array_keys($params)) ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "required request param does not exists"
-                );
-            }
-            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
-            $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
-            if ( !$payment ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "requested payment do not exists"
-                );
-            }
+            $this->checkSignature($url, $params);
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount'), $params);
+            $payment = $this->getPaymentById($params['pg_payment_id']);
+
+
+
+
             if ( $payment->getPurchase()->getId() !== (int) $params['pg_order_id'] ) {
                 throw new PaymentServiceInvalidArgumentException(
                     "requested payment has another purchase"
                 );
             }
-            if ( $payment->getInvoiceSum() != $params['pg_amount'] ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "does not match the payment amount"
-                );
-            }
+            $this->checkPaymentInvoiceSum($payment, $params['pg_amount']);
+
             $event = new PaymentCheckEvent($payment, $params);
             $this->eventDispatcher->dispatch(PaymentCheckEvent::NAME, $event);
             if ( $event->getPayment()->getStatus() !== Payment::STATUS_NEW ) {
@@ -195,7 +271,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $payment->setStatus(Payment::STATUS_WAIT_PAID);
             $this->entityManager->persist($payment);
             $this->entityManager->flush();
-            $this->logger->info( 'checkPayment', $params);
+            $this->writeInfoLog("checkPayment", $params);
         } catch (\Exception $e) {
             $this->logger->error( 'checkPayment: ' . $e->getMessage(), $params);
             $response = [
@@ -212,24 +288,14 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
         $response = [];
         try {
             $this->checkSignature($url, $params);
-            $requiredParams = ['pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_result', 'pg_can_reject'];
-            if ( array_diff($requiredParams, array_keys($params)) ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "required request param does not exists"
-                );
-            }
-            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
-            $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
-            if ( !$payment ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "requested payment do not exists"
-                );
-            }
-            if ( $payment->getInvoiceSum() != $params['pg_amount'] ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "does not match the payment amount"
-                );
-            }
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_result', 'pg_can_reject'), $params);
+            $payment = $this->getPaymentById($params['pg_payment_id']);
+            $this->checkPaymentInvoiceSum($payment, $params['pg_amount']);
+
+
+
+
+
             if ( (int) $params['pg_result'] !== 1 ) {
                 throw new PaymentServiceInvalidArgumentException("payment response failure status");
             }
@@ -247,7 +313,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             ;
             $this->entityManager->persist($payment);
             $this->entityManager->flush();
-            $this->logger->info( 'resultPayment', $params);
+            $this->writeInfoLog("resultPayment", $params);
             $response = [
                 'pg_status' => 'ok',
                 'pg_description' =>'payment is accepted',
@@ -267,7 +333,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                 $this->entityManager->flush();
             }
             $response['pg_error_description'] = $e->getMessage();
-            $this->logger->error( 'resultPayment: ' . $e->getMessage(), $params);
+            $this->writeErrorLog("resultPayment: ".$e->getMessage(), $params);
         }
         return $this->makeResponse($url, $response);
     }
@@ -277,19 +343,12 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
         $response = ['pg_status' => 'ok'];
         try {
             $this->checkSignature($url, $params);
-            $requiredParams = ['pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_net_amount', 'pg_refund_id'];
-            if ( array_diff($requiredParams, array_keys($params)) ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "required request param does not exists"
-                );
-            }
-            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
-            $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
-            if ( !$payment ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "requested payment do not exists"
-                );
-            }
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_net_amount', 'pg_refund_id'), $params);
+            $payment = $this->getPaymentById($params['pg_payment_id']);
+
+
+
+
             $sysInfoArr = explode(':', $payment->getSysInfo());
             if ( !in_array($params['pg_refund_id'], $sysInfoArr) ) {
                 $payment->setPaidSum($payment->getPaidSum() - $params['pg_net_amount']);
@@ -301,13 +360,13 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
                 $event = new PaymentRefundEvent($payment, $params);
                 $this->eventDispatcher->dispatch(PaymentRefundEvent::NAME, $event);
             }
-            $this->logger->info( 'refundPayment', $params);
+            $this->writeInfoLog("refundPayment", $params);
         } catch (\Exception $e) {
             $response = [
                 'pg_status' => 'error',
                 'pg_error_description' => $e->getMessage(),
             ];
-            $this->logger->error( 'refundPayment: ' . $e->getMessage(), $params);
+            $this->writeErrorLog("refundPayment: ".$e->getMessage(), $params);
         }
         return $this->makeResponse($url, $response);
     }
@@ -316,23 +375,16 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
     {
         try {
             $this->checkSignature($url, $params);
-            $requiredParams = ['pg_payment_id', 'pg_order_id'];
-            if ( array_diff($requiredParams, array_keys($params)) ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "required request param does not exists"
-                );
-            }
-            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
-            $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
-            if ( !$payment ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "requested payment do not exists"
-                );
-            }
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id'), $params);
+            $payment = $this->getPaymentById($params['pg_payment_id']);
+
+
+
+
             $event = new PaymentResultSuccessEvent($payment, $params);
             $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->logger->error( 'successPayment: ' . $e->getMessage(), $params);
+            $this->writeErrorLog("successPayment ".$e->getMessage(), $params);
             throw new NotFoundHttpException("Page not found");
         }
     }
@@ -341,31 +393,20 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
     {
         try {
             $this->checkSignature($url, $params);
-            $requiredParams = ['pg_payment_id', 'pg_order_id', 'pg_failure_code', 'pg_failure_description'];
-            if ( array_diff($requiredParams, array_keys($params)) ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "required request param does not exists"
-                );
-            }
-            $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
-            $payment = $repo->findOneBy(['paymentId' => $params['pg_payment_id']]);
-            if ( !$payment ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "requested payment do not exists"
-                );
-            }
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_failure_code', 'pg_failure_description'), $params);
+            $payment = $this->getPaymentById($params['pg_payment_id']);
+
+
+
+
+
+
             $event = new PaymentResultFailureEvent($payment, $params);
             $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->logger->error( 'failurePayment: ' . $e->getMessage(), $params);
+            $this->writeErrorLog("failurePayment: ".$e->getMessage(), $params);
             throw new NotFoundHttpException("Page not found");
         }
     }
 
-    private function makeResponse($url, $params)
-    {
-        $params = array_merge(['pg_salt' => $this->generateSalt($params)], $params);
-        $params = array_merge(['pg_sig' => $this->generateSignature($url, $params)], $params);
-        return $params;
-    }
 }
