@@ -4,40 +4,65 @@ namespace Yamilovs\PaymentBundle\Manager;
 
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
-use Doctrine\ORM\EntityManagerInterface;
 use Yamilovs\PaymentBundle\Entity\Payment;
-use Yamilovs\PaymentBundle\Entity\Purchase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class PaymentServiceAbstract implements PaymentServiceInterface
 {
+    /** @var Logger */
     protected $logger;
-    protected $paramsMapping = [];
-    /** @var  EntityManager */
-    protected $entityManager;
-    /** @var  EventDispatcher */
-    protected $eventDispatcher;
-
-    public final function setLogger(Logger $logger)
-    {
-        $this->logger = $logger;
-    }
 
     public function __toString()
     {
         return $this->getAlias();
     }
 
-    public final function setEntityManager(EntityManagerInterface $entityManager)
+    public final function setLogger(Logger $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public final function setEntityManager(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
-    public final function setEventDispatcher(EventDispatcherInterface $eventDispatcher)
+    public final function setEventDispatcher(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
     }
+
+    protected function writeErrorLog($message, $parameters)
+    {
+        $this->logger->error($message, $parameters);
+    }
+
+    protected function writeInfoLog($message, $parameters)
+    {
+        $this->logger->info($message, $parameters);
+    }
+
+
+
+
+
+
+
+
+
+    protected $paramsMapping = [];
+    /** @var  EntityManager */
+    protected $entityManager;
+    /** @var  EventDispatcher */
+    protected $eventDispatcher;
+
+
+
+
+
+
+
+
 
     protected final function setPayment($sum, $paymentId, $purchaseId)
     {
