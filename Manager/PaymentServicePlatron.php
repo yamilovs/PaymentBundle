@@ -63,7 +63,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
     private function getPaymentById($paymentId)
     {
         $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
-        $payment = $repo->find($paymentId);
+        $payment = $repo->findOneBy(['paymentId' => $paymentId]);
         if (!$payment) {
             throw new PaymentServiceInvalidArgumentException(
                 "Payment with id '$paymentId' does not exists in database"

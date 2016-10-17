@@ -4,5 +4,5 @@ namespace Yamilovs\PaymentBundle\Event;
 
 class PaymentResultSuccessEvent extends PaymentEventAbstract
 {
-    const NAME = 'payment.result.success.event';
+    const NAME = 'event.payment.result.success';
 }
