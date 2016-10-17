@@ -6,9 +6,9 @@ services:
     yamilovs.payment.abstract:
         abstract: true
         calls:
-            - [setLogger, [@logger]]
-            - [setEntityManager, [@doctrine.orm.entity_manager]]
-            - [setEventDispatcher, [@event_dispatcher]]
+            - [setLogger, ["@logger"]]
+            - [setEntityManager, ["@doctrine.orm.entity_manager"]]
+            - [setEventDispatcher, ["@event_dispatcher"]]
         tags:
             - { name: monolog.logger, channel: payment }
 
