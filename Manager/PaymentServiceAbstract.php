@@ -42,7 +42,20 @@ abstract class PaymentServiceAbstract implements PaymentServiceInterface
         $this->logger->info($message, $parameters);
     }
 
-
+    /**
+     * Check that parameters has all required ones
+     * @param array $parameters
+     * @param array $requiredParameters
+     * @throws PaymentServiceInvalidArgumentException
+     */
+    protected function checkRequiredParameters(array $requiredParameters, array $parameters)
+    {
+        $missingParameters = array_diff($requiredParameters, array_keys($parameters));
+        if ($missingParameters) {
+            throw new PaymentServiceInvalidArgumentException("Some required parameters does not exists. Has: ".implode(", ", array_keys($parameters)).". 
+            Also need: ".implode(", ", array_keys($missingParameters)));
+        }
+    }
 
 
 
@@ -92,25 +105,11 @@ abstract class PaymentServiceAbstract implements PaymentServiceInterface
             'user_mail',
         ];
 
-        $this->checkRequiredFields($params, $requiredParams);
+        $this->checkRequiredFields($requiredParams, $params);
 
         return $this->transformParamsKey($params);
     }
 
-    /**
-     * Check required params fields
-     *
-     * @param array $params
-     * @param array $requiredParams
-     * @throws PaymentServiceInvalidArgumentException
-     */
-    private function checkRequiredFields(array $params, array $requiredParams)
-    {
-        $missingParams = array_diff($requiredParams, array_keys($params));
-        if ($missingParams) {
-            throw new PaymentServiceInvalidArgumentException('Miss required method params: ' . implode($missingParams, ', '));
-        }
-    }
 
     /**
      * Transform required params keys to specific payment key

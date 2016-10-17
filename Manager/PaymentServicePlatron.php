@@ -40,21 +40,6 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
     }
 
     /**
-     * Check that payment request has all requred values
-     * @param array $requiredParameters
-     * @param array $parameters
-     * @throws PaymentServiceInvalidArgumentException
-     */
-    protected function checkRequiredParameters(array $requiredParameters, array $parameters)
-    {
-        if (array_diff($requiredParameters, array_keys($parameters)) ) {
-            throw new PaymentServiceInvalidArgumentException(
-                "Required parameters does not exists in request. Looking: ".implode(", ", $requiredParameters).", but got: ".implode(", ", array_keys($parameters))
-            );
-        }
-    }
-
-    /**
      * Check that payment invoice amount is equal to expected invoice amount
      * @param Payment $payment
      * @param $invoiceSum
