@@ -6,7 +6,7 @@ use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Response;
 use Yamilovs\PaymentBundle\Entity\Payment;
 
-abstract class PaymentEventAbstract extends Event
+abstract class AbstractPaymentEvent extends Event
 {
     protected $payment;
     protected $request;

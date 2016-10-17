@@ -2,7 +2,7 @@
 
 namespace Yamilovs\PaymentBundle\Event;
 
-class PaymentCheckEvent extends PaymentEventAbstract
+class PaymentCheckEvent extends AbstractPaymentEvent
 {
     const NAME = 'payment.check.event';
 }
