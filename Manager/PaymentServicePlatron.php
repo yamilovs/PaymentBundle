@@ -40,27 +40,12 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
     }
 
     /**
-     * Check that payment request has all requred values
-     * @param array $requiredParameters
-     * @param array $parameters
-     * @throws PaymentServiceInvalidArgumentException
-     */
-    protected function checkRequiredParameters(array $requiredParameters, array $parameters)
-    {
-        if (array_diff($requiredParameters, array_keys($parameters)) ) {
-            throw new PaymentServiceInvalidArgumentException(
-                "Required parameters does not exists in request. Looking: ".implode(", ", $requiredParameters).", but got: ".implode(", ", array_keys($parameters))
-            );
-        }
-    }
-
-    /**
      * Check that payment invoice amount is equal to expected invoice amount
      * @param Payment $payment
      * @param $invoiceSum
      * @throws PaymentServiceInvalidArgumentException
      */
-    protected function checkPaymentInvoiceSum(Payment $payment, $invoiceSum)
+    private function checkPaymentInvoiceSum(Payment $payment, $invoiceSum)
     {
         if ($payment->getInvoiceSum() != $invoiceSum) {
             throw new PaymentServiceInvalidArgumentException(
@@ -75,7 +60,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
      * @throws PaymentServiceInvalidArgumentException
      * @return Payment
      */
-    protected function getPaymentById($paymentId)
+    private function getPaymentById($paymentId)
     {
         $repo = $this->entityManager->getRepository('YamilovsPaymentBundle:Payment');
         $payment = $repo->find($paymentId);
@@ -89,39 +74,40 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
 
     /**
      * Create request salt based on request parameters
-     * @param array $params
+     * @param array $parameters
      * @return string
      */
-    protected function generateSalt(array $params)
+    private function generateSalt(array $parameters)
     {
-        return substr(md5($this->implodeNestedArray($params).$this->salt), 0, 10);
+        return substr(md5($this->implodeNestedArray($parameters).$this->salt), 0, 10);
     }
     
     /**
      * Return platron signature for response based on request parameters
+     * More info on http://www.platron.ru/integration/Merchant_Platron_API_EN.pdf
      * @param $url
-     * @param array $params
+     * @param array $parameters
      * @return string
      */
-    protected function generateSignature($url, array $params)
+    private function generateSignature($url, array $parameters)
     {
         if (strpos($url, '/') !== false) {
             $url = substr($url, strrpos($url, '/') + 1);
         }
-        return md5($url.self::DELIMITER.$this->implodeNestedArray($params).self::DELIMITER.$this->secretKey);
+        return md5($url.self::DELIMITER.$this->implodeNestedArray($parameters).self::DELIMITER.$this->secretKey);
     }
 
     /**
      * Recursively implode arrays with delimiter
-     * @param array $params
+     * @param array $parameters
      * @param string $delimiter
      * @return string
      */
-    protected function implodeNestedArray(array $params, $delimiter = self::DELIMITER)
+    private function implodeNestedArray(array $parameters, $delimiter = self::DELIMITER)
     {
         $values = [];
-        ksort($params);
-        foreach($params as $param) {
+        ksort($parameters);
+        foreach($parameters as $param) {
             $values[] = is_array($param) ? $this->implodeNestedArray($param) : $param;
         }
         return implode($values, $delimiter);
@@ -130,14 +116,35 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
     /**
      * Return array of parameters for response
      * @param $url
-     * @param $params
+     * @param $parameters
      * @return array
      */
-    protected function makeResponse($url, $params)
+    private function makeResponse($url, array $parameters)
     {
-        $params = array_merge(['pg_salt' => $this->generateSalt($params)], $params);
-        $params = array_merge(['pg_sig' => $this->generateSignature($url, $params)], $params);
-        return $params;
+        $parameters = array_merge(['pg_salt' => $this->generateSalt($parameters)], $parameters);
+        $parameters = array_merge(['pg_sig' => $this->generateSignature($url, $parameters)], $parameters);
+        return $parameters;
+    }
+
+    /**
+     * Check that signature of platron server respones exists and equal our generated one
+     * @param $url
+     * @param array $parameters
+     */
+    private function checkSignature($url, array $parameters)
+    {
+        if (!array_key_exists('pg_sig', $parameters)) {
+            throw new PaymentServiceInvalidArgumentException(
+                "Platron response does not contain any signature value ('pg_sig')"
+            );
+        }
+        $signature = $parameters['pg_sig'];
+        unset($parameters['pg_sig']);
+        if ($signature != $this->generateSignature($url, $parameters)) {
+            throw new PaymentServiceInvalidArgumentException(
+                "Platron responsed signature does not equal generated signature"
+            );
+        }
     }
 
 
@@ -215,21 +222,6 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
         return $response;
     }
 
-    private function checkSignature($url, array $params)
-    {
-        if (!array_key_exists('pg_sig', $params)) {
-            throw new PaymentServiceInvalidArgumentException(
-                "platron server response signature field don't exists."
-            );
-        }
-        $signature = $params['pg_sig'];
-        unset($params['pg_sig']);
-        if ( $signature != $this->generateSignature($url, $params) ) {
-            throw new PaymentServiceInvalidArgumentException(
-                "platron server response invalid signature."
-            );
-        }
-    }
 
     /**
      *
