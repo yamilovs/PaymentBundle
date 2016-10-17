@@ -376,7 +376,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $event = new PaymentResultSuccessEvent($payment, $params);
             $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->writeErrorLog("successPayment ".$e->getMessage(), $params);
+            $this->writeErrorLog("checkPaymentSuccess ".$e->getMessage(), $params);
             throw new PaymentServiceInvalidArgumentException("requested payment had invalid params");
         }
     }
@@ -394,7 +394,7 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
             $event = new PaymentResultFailureEvent($payment, $params);
             $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->writeErrorLog("successPayment ".$e->getMessage(), $params);
+            $this->writeErrorLog("checkPaymentFailure ".$e->getMessage(), $params);
             throw new PaymentServiceInvalidArgumentException("requested payment had invalid params");
         }
     }

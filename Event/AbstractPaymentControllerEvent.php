@@ -19,6 +19,14 @@ abstract class AbstractPaymentControllerEvent extends Event
     }
 
     /**
+     * @return Payment
+     */
+    public function getPayment()
+    {
+        return $this->payment;
+    }
+
+    /**
      * @param mixed $response
      */
     public function setResponse(Response $response)
