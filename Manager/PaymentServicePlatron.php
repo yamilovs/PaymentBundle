@@ -381,29 +381,26 @@ class PaymentServicePlatron extends PaymentServiceAbstract implements PaymentSer
         }
     }
 
-    public function getPaymentByParams(array $params)
-    {
-        return $this->getPaymentById($params['pg_payment_id']);
-    }
-
-    public function failurePayment($url, $params)
+    public function checkPaymentFailure($url, $params)
     {
         try {
             $this->checkSignature($url, $params);
             $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_failure_code', 'pg_failure_description'), $params);
             $payment = $this->getPaymentById($params['pg_payment_id']);
-
-
-
-
-
-
+            if ( $payment->getStatus() != Payment::STATUS_ERROR ) {
+                $payment->setStatus(Payment::STATUS_ERROR);
+                $this->entityManager->flush();
+            }
             $event = new PaymentResultFailureEvent($payment, $params);
-            $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
+            $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->writeErrorLog("failurePayment: ".$e->getMessage(), $params);
-            throw new NotFoundHttpException("Page not found");
+            $this->writeErrorLog("successPayment ".$e->getMessage(), $params);
+            throw new PaymentServiceInvalidArgumentException("requested payment had invalid params");
         }
     }
 
+    public function getPaymentByParams(array $params)
+    {
+        return $this->getPaymentById($params['pg_payment_id']);
+    }
 }
