@@ -105,7 +105,7 @@ abstract class PaymentServiceAbstract implements PaymentServiceInterface
             'user_mail',
         ];
 
-        $this->checkRequiredFields($requiredParams, $params);
+        $this->checkRequiredParameters($requiredParams, $params);
 
         return $this->transformParamsKey($params);
     }
