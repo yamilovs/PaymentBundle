@@ -49,8 +49,8 @@ abstract class AbstractPaymentService
     {
         $missingParameters = array_diff($requiredParameters, array_keys($parameters));
         if ($missingParameters) {
-            throw new PaymentServiceInvalidArgumentException("Some required parameters does not exists. Has: ".implode(", ", array_keys($parameters)).". 
-            Also need: ".implode(", ", array_keys($missingParameters)));
+            throw new PaymentServiceInvalidArgumentException("Some required parameters does not exists. Has: " . implode(", ", array_keys($parameters)) . ". 
+            Also need: " . implode(", ", array_keys($missingParameters)));
         }
     }
 
@@ -73,8 +73,8 @@ abstract class AbstractPaymentService
      */
     private function getRemappedParameters(array $parameters)
     {
-        $result     = [];
-        $mapKeys    = array_keys($this->parametersMapping);
+        $result = [];
+        $mapKeys = array_keys($this->parametersMapping);
 
         foreach ($parameters as $key => $param) {
             if (in_array($key, $mapKeys)) {
@@ -104,8 +104,7 @@ abstract class AbstractPaymentService
             ->setPurchase($purchase)
             ->setPaymentId($paymentId)
             ->setInvoiceSum($amount)
-            ->setPaymentType($this->getAlias())
-        ;
+            ->setPaymentType($this->getAlias());
         $this->entityManager->persist($payment);
         $this->entityManager->flush();
 

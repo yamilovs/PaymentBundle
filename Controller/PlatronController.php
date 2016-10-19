@@ -19,9 +19,9 @@ class PlatronController extends Controller
     public function checkAction(Request $request)
     {
         /** @var PaymentServicePlatron $manager */
-        $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
-        $params     = $request->request->all();
-        $data       = $manager->getCheckPaymentResponseData($this->generateUrl('yamilovs_payment_platron_check'), $params);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
+        $params = $request->request->all();
+        $data = $manager->getCheckPaymentResponseData($this->generateUrl('yamilovs_payment_platron_check'), $params);
         return new XmlResponse($data);
     }
 
@@ -33,9 +33,9 @@ class PlatronController extends Controller
     public function resultAction(Request $request)
     {
         /** @var PaymentServicePlatron $manager */
-        $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
-        $params     = $request->request->all();
-        $data       = $manager->getResultPaymentResponseData($this->generateUrl('yamilovs_payment_platron_result'), $params);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
+        $params = $request->request->all();
+        $data = $manager->getResultPaymentResponseData($this->generateUrl('yamilovs_payment_platron_result'), $params);
         return new XmlResponse($data);
     }
 
@@ -47,9 +47,9 @@ class PlatronController extends Controller
     public function refundAction(Request $request)
     {
         /** @var PaymentServicePlatron $manager */
-        $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
-        $params     = $request->request->all();
-        $data       = $manager->getRefundResponseData($this->generateUrl('yamilovs_payment_platron_refund'), $params);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
+        $params = $request->request->all();
+        $data = $manager->getRefundResponseData($this->generateUrl('yamilovs_payment_platron_refund'), $params);
         return new XmlResponse($data);
     }
 
@@ -61,9 +61,9 @@ class PlatronController extends Controller
     public function successAction(Request $request)
     {
         /** @var PaymentServicePlatron $manager */
-        $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
-        $params     = $request->request->all();
-        $payment    = $manager->getSuccessPayment($this->generateUrl('yamilovs_payment_platron_success'), $params);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
+        $params = $request->request->all();
+        $payment = $manager->getSuccessPayment($this->generateUrl('yamilovs_payment_platron_success'), $params);
 
         if (!$payment) {
             return $this->createNotFoundException();
@@ -90,9 +90,9 @@ class PlatronController extends Controller
     public function failureAction(Request $request)
     {
         /** @var PaymentServicePlatron $manager */
-        $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
-        $params     = $request->request->all();
-        $payment    = $manager->getFailurePayment($this->generateUrl('yamilovs_payment_platron_failure'), $params);
+        $manager = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
+        $params = $request->request->all();
+        $payment = $manager->getFailurePayment($this->generateUrl('yamilovs_payment_platron_failure'), $params);
 
         if (!$payment) {
             return $this->createNotFoundException();
