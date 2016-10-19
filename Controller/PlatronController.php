@@ -24,13 +24,12 @@ class PlatronController extends Controller
         /** @var PaymentServicePlatron $manager */
         $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params     = $request->request->all();
-        $data       = $manager->checkPayment($this->generateUrl('yamilovs_payment_platron_check'), $params);
+        $data       = $manager->getCheckPaymentResponseData($this->generateUrl('yamilovs_payment_platron_check'), $params);
         return new XmlResponse($data);
     }
 
     /**
-     * Сообщение о результате платежа
-     *
+     * Return xml response for platron result action
      * @param Request $request
      * @return XmlResponse
      */
@@ -39,13 +38,12 @@ class PlatronController extends Controller
         /** @var PaymentServicePlatron $manager */
         $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params     = $request->request->all();
-        $data       = $manager->resultPayment($this->generateUrl('yamilovs_payment_platron_result'), $params);
+        $data       = $manager->getResultPaymentResponseData($this->generateUrl('yamilovs_payment_platron_result'), $params);
         return new XmlResponse($data);
     }
 
     /**
-     * Сообщение о результате платежа
-     *
+     * Return xml response for platron refund action
      * @param Request $request
      * @return XmlResponse
      */
@@ -54,7 +52,7 @@ class PlatronController extends Controller
         /** @var PaymentServicePlatron $manager */
         $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params     = $request->request->all();
-        $data       = $manager->resultPayment($this->generateUrl('yamilovs_payment_platron_refund'), $params);
+        $data       = $manager->getRefundResponseData($this->generateUrl('yamilovs_payment_platron_refund'), $params);
         return new XmlResponse($data);
     }
 
@@ -67,22 +65,23 @@ class PlatronController extends Controller
         /** @var PaymentServicePlatron $manager */
         $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params     = $request->request->all();
-        $view = 'YamilovsPaymentBundle:Platron:success.html.twig';
-        try {
-            $manager->checkPaymentSuccess($this->generateUrl('yamilovs_payment_platron_success'), $params);
-            $payment = $manager->getPaymentByParams($params);
-            $data = [ 'payment' => $payment ];
-            $event = new PaymentControllerSuccessEvent($payment);
-            $this->get('event_dispatcher')->dispatch(PaymentControllerSuccessEvent::NAME, $event);
-            if ( $event->getResponse() ) {
-                return $event->getResponse();
-            }
-        } catch (\Exception $e) {
-            throw new NotFoundHttpException("Page not found");
+        $payment    = $manager->getSuccessPayment($this->generateUrl('yamilovs_payment_platron_success'), $params);
+
+        if (!$payment) {
+            return $this->createNotFoundException();
         }
-        $view = $event->getResponseView() ?: $view;
-        $data = $event->getResponseParameters() ?: $data;
-        return $this->render($view, $data);
+
+        $event = new PaymentControllerSuccessEvent($payment);
+        $this->get('event_dispatcher')->dispatch(PaymentControllerSuccessEvent::NAME, $event);
+
+        if ($event->getResponse() !== null) {
+            return $event->getResponse();
+        }
+
+        return $this->render(
+            $event->getTemplate() ?: "YamilovsPaymentBundle:Platron:success.html.twig",
+            $event->getTemplateParameters() ?: array('payment' => $payment)
+        );
     }
 
     /**
@@ -94,21 +93,22 @@ class PlatronController extends Controller
         /** @var PaymentServicePlatron $manager */
         $manager    = $this->get('yamilovs.payment.factory')->get(PaymentServicePlatron::ALIAS);
         $params     = $request->request->all();
-        $view = 'YamilovsPaymentBundle:Platron:failure.html.twig';
-        try {
-            $manager->checkPaymentFailure($this->generateUrl('yamilovs_payment_platron_failure'), $params);
-            $payment = $manager->getPaymentByParams($params);
-            $data = [ 'payment' => $payment ];
-            $event = new PaymentControllerFailureEvent($payment);
-            $this->get('event_dispatcher')->dispatch(PaymentControllerFailureEvent::NAME, $event);
-            if ( $event->getResponse() ) {
-                return $event->getResponse();
-            }
-        } catch (\Exception $e) {
-            throw new NotFoundHttpException("Page not found");
+        $payment    = $manager->getFailurePayment($this->generateUrl('yamilovs_payment_platron_failure'), $params);
+
+        if (!$payment) {
+            return $this->createNotFoundException();
         }
-        $view = $event->getResponseView() ?: $view;
-        $data = $event->getResponseParameters() ?: $data;
-        return $this->render($view, $data);
+
+        $event = new PaymentControllerFailureEvent($payment);
+        $this->get('event_dispatcher')->dispatch(PaymentControllerFailureEvent::NAME, $event);
+
+        if ($event->getResponse() !== null) {
+            return $event->getResponse();
+        }
+
+        return $this->render(
+            $event->getTemplate() ?: "YamilovsPaymentBundle:Platron:failure.html.twig",
+            $event->getTemplateParameters() ?: array('payment' => $payment)
+        );
     }
 }

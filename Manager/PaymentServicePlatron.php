@@ -3,7 +3,6 @@
 namespace Yamilovs\PaymentBundle\Manager;
 
 use anlutro\cURL\cURL;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Yamilovs\PaymentBundle\Entity\Payment;
 use Yamilovs\PaymentBundle\Event\PaymentCheckEvent;
 use Yamilovs\PaymentBundle\Event\PaymentRefundEvent;
@@ -12,14 +11,23 @@ use Yamilovs\PaymentBundle\Event\PaymentResultSuccessEvent;
 
 class PaymentServicePlatron extends AbstractPaymentService implements PaymentServiceInterface
 {
-    const ALIAS     = 'platron';
-    const DELIMITER = ';';
+    const ALIAS             = 'platron';
+    const DELIMITER         = ';';
+    const PAYMENT_TIMEOUT   = 300;
 
     protected $hostname;    // yamilovs_payment.services.platron.hostname
     protected $merchantId;  // yamilovs_payment.services.platron.merchant_id
     protected $secretKey;   // yamilovs_payment.services.platron.secret_key
     protected $salt;        // yamilovs_payment.services.platron.salt
     protected $apiUrlInit;  // yamilovs_payment.services.platron.api_url_init
+
+    protected $parametersMapping = [
+        'sum'           => 'pg_amount',
+        'purchase_id'   => 'pg_order_id',
+        'user_phone'    => 'pg_user_phone',
+        'user_email'    => 'pg_user_mail',
+        'description'   => 'pg_description',
+    ];
 
     public function __construct($hostname, $merchantId, $secretKey, $salt, $apiUrlInit)
     {
@@ -29,7 +37,7 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
         $this->salt         = $salt;
         $this->apiUrlInit   = $apiUrlInit;
     }
-    
+
     /**
      * Return an alias of this payment service
      * @return string
@@ -37,21 +45,6 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
     public function getAlias()
     {
         return self::ALIAS;
-    }
-
-    /**
-     * Check that payment invoice amount is equal to expected invoice amount
-     * @param Payment $payment
-     * @param $invoiceSum
-     * @throws PaymentServiceInvalidArgumentException
-     */
-    private function checkPaymentInvoiceSum(Payment $payment, $invoiceSum)
-    {
-        if ($payment->getInvoiceSum() != $invoiceSum) {
-            throw new PaymentServiceInvalidArgumentException(
-                "Payment invoice amount not equal to the expected amount"
-            );
-        }
     }
 
     /**
@@ -130,6 +123,31 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
     }
 
     /**
+     * Send a request to platron server and convert platron response to an associative array
+     *
+     * @param $url
+     * @param array $parameters
+     * @return array
+     */
+    private function makeRequest($url, array $parameters)
+    {
+        $parameters['pg_merchant_id'] = $this->merchantId;
+        $parameters = array_merge(['pg_salt' => $this->generateSalt($parameters)], $parameters);
+        $parameters = array_merge(['pg_sig' => $this->generateSignature($url, $parameters)], $parameters);
+
+        $curl = new cURL;
+        $serverResponse = $curl->post($this->hostname."/".$url, $parameters);
+        $response = json_decode(json_encode((array) simplexml_load_string($serverResponse->body)), true);
+
+        if (!is_array($response)) {
+            throw new PaymentServiceInvalidArgumentException(
+                "Invalid response from platron server: ".$serverResponse->body
+            );
+        }
+        return $response;
+    }
+
+    /**
      * Check that signature of platron server respones exists and equal our generated one
      * @param $url
      * @param array $parameters
@@ -150,260 +168,210 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    const PAYMENT_TIMEOUT = 300;
-
-
-    protected $paramsMapping = [
-        'sum'               => 'pg_amount',
-        'purchase_id'       => 'pg_order_id',
-        'user_phone'        => 'pg_user_phone',
-        'user_mail'         => 'pg_user_mail',
-        'description'       => 'pg_description',
-    ];
-
-    
-
-
-
-    public function getPayUrl(array $params)
-    {
-        try {
-            $normalizedParams = parent::getPayUrl($params);
-            $data = $this->makeRequest($this->apiUrlInit, $normalizedParams);
-            $this->checkSignature($this->apiUrlInit, $data);
-            $this->setPayment($params['sum'], $data['pg_payment_id'], $params['purchase_id']);
-            $this->logger->info("platron getPayUrl", array_merge($data, $params));
-            return $data['pg_redirect_url'];
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage(), $params);
-        }
-    }
-
-
-
-
-
     /**
-     * Make request to platron server and convert response to associative array
-     *
+     * Return data for platron refund action
      * @param $url
-     * @param array $params
+     * @param $parameters
      * @return array
      */
-    private function makeRequest($url, array $params)
+    public function getRefundResponseData($url, $parameters)
     {
-        $params['pg_merchant_id'] = $this->merchantId;
-        $params = array_merge(['pg_salt' => $this->generateSalt($params)], $params);
-        $params = array_merge(['pg_sig' => $this->generateSignature($url, $params)], $params);
-        $curl = new cURL;
-        $serverResponse = $curl->post("https://{$this->hostname}/{$url}", $params);
-        $response = json_decode(json_encode((array) simplexml_load_string($serverResponse->body)), true);
-        if (!is_array($response)) {
-            throw new PaymentServiceInvalidArgumentException(
-                "platron server invalid response: " . $serverResponse->body
-            );
+        try {
+            $this->checkSignature($url, $parameters);
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_net_amount', 'pg_refund_id'), $parameters);
+            $payment = $this->getPaymentById($parameters['pg_payment_id']);
+        } catch (\Exception $e) {
+            $this->logger->error("Failed payment refund action. Exception occurs: ".$e->getMessage(), $parameters);
+            return $this->makeResponse($url, array('pg_status' => 'error', 'pg_error_description' => $e->getMessage()));
         }
-        return $response;
-    }
 
+        $sysInfoArr = explode(':', $payment->getSysInfo());
+        if (!in_array($parameters['pg_refund_id'], $sysInfoArr) ) {
+            $payment->setPaidSum($payment->getPaidSum() - $parameters['pg_net_amount']);
+            $payment->setStatus($payment->getPaidSum() > 0 ? Payment::STATUS_PARTIAL_REFUND : Payment::STATUS_REFUND);
+            $payment->setSysInfo(implode(':', array_merge(array($parameters['pg_refund_id']), $sysInfoArr)));
+
+            $event = new PaymentRefundEvent($payment, $parameters);
+            $this->eventDispatcher->dispatch(PaymentRefundEvent::NAME, $event);
+
+            $this->entityManager->flush();
+        }
+
+        $this->logger->info("Successfully payment refund action", $parameters);
+        return $this->makeResponse($url, array('pg_status' => 'ok'));
+    }
 
     /**
-     *
-     *
-     * @param  string  $url
-     * @param  array   $params
-     * @return array   array
+     * Return data for platron result action
+     * @param $url
+     * @param $parameters
+     * @return array
      */
-    public function checkPayment($url, $params)
+    public function getResultPaymentResponseData($url, $parameters)
     {
-        $response = [
-            'pg_status' => 'ok',
-            'pg_timeout' => self::PAYMENT_TIMEOUT,
-        ];
-
         try {
-            $this->checkSignature($url, $params);
-            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount'), $params);
-            $payment = $this->getPaymentById($params['pg_payment_id']);
-
-
-
-
-            if ( $payment->getPurchase()->getId() !== (int) $params['pg_order_id'] ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    "requested payment has another purchase"
-                );
+            $this->checkSignature($url, $parameters);
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_result', 'pg_can_reject'), $parameters);
+            if ((int) $parameters['pg_result'] !== 1 ) {
+                throw new PaymentServiceInvalidArgumentException("Payment result action return failure status.");
             }
-            $this->checkPaymentInvoiceSum($payment, $params['pg_amount']);
 
-            $event = new PaymentCheckEvent($payment, $params);
-            $this->eventDispatcher->dispatch(PaymentCheckEvent::NAME, $event);
-            if ( $event->getPayment()->getStatus() !== Payment::STATUS_NEW ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    $event->getMessage() ?: "payment rejected from client"
-                );
+            $payment = $this->getPaymentById($parameters['pg_payment_id']);
+            if ($payment->getInvoiceSum() != $parameters['pg_amount']) {
+                throw new PaymentServiceInvalidArgumentException("Payment invoice amount not equal to the expected amount");
             }
-            // change payment status
-            $payment->setStatus(Payment::STATUS_WAIT_PAID);
-            $this->entityManager->persist($payment);
-            $this->entityManager->flush();
-            $this->logger->info("checkPayment", $params);
-        } catch (\Exception $e) {
-            $this->logger->error( 'checkPayment: ' . $e->getMessage(), $params);
-            $response = [
-                'pg_status' => 'rejected',
-                'pg_description' => $e->getMessage(),
-            ];
-        }
-        return $this->makeResponse($url, $response);
-    }
 
-    public function resultPayment($url, $params)
-    {
-        $payment = null;
-        $response = [];
-        try {
-            $this->checkSignature($url, $params);
-            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_result', 'pg_can_reject'), $params);
-            $payment = $this->getPaymentById($params['pg_payment_id']);
-            $this->checkPaymentInvoiceSum($payment, $params['pg_amount']);
-
-
-
-
-
-            if ( (int) $params['pg_result'] !== 1 ) {
-                throw new PaymentServiceInvalidArgumentException("payment response failure status");
-            }
-            $event = new PaymentResultSuccessEvent($payment, $params);
+            $event = new PaymentResultSuccessEvent($payment, $parameters);
             $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
-            if ( $event->getPayment()->getStatus() !== Payment::STATUS_ERROR ) {
-                throw new PaymentServiceInvalidArgumentException(
-                    $event->getMessage() ?: "payment failure"
-                );
+            if ($event->getPayment()->getStatus() == Payment::STATUS_ERROR) {
+                throw new PaymentServiceInvalidArgumentException($event->getMessage() ?: "Payment status is error, after successful event");
             }
-            // update payment status
-            $payment
-                ->setPaidSum($params['pg_amount'])
-                ->setStatus(Payment::STATUS_PAID)
-            ;
-            $this->entityManager->persist($payment);
-            $this->entityManager->flush();
-            $this->logger->info("resultPayment", $params);
-            $response = [
-                'pg_status' => 'ok',
-                'pg_description' =>'payment is accepted',
-            ];
         } catch (\Exception $e) {
-            $response['pg_status'] = 'error';
-            if ($payment) {
-                $event = new PaymentResultFailureEvent($payment, $params);
-                $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
-                $paymentStatus = Payment::STATUS_ERROR;
-                if ( $params['pg_can_reject'] ) {
-                    $response['pg_status'] = 'reject';
-                    $paymentStatus = Payment::STATUS_WAIT_REJECT;
-                }
-                $payment->setStatus($paymentStatus);
-                $this->entityManager->persist($payment);
-                $this->entityManager->flush();
-            }
-            $response['pg_error_description'] = $e->getMessage();
-            $this->logger->error("resultPayment: ".$e->getMessage(), $params);
-        }
-        return $this->makeResponse($url, $response);
-    }
-
-    public function refundAction($url, $params)
-    {
-        $response = ['pg_status' => 'ok'];
-        try {
-            $this->checkSignature($url, $params);
-            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_net_amount', 'pg_refund_id'), $params);
-            $payment = $this->getPaymentById($params['pg_payment_id']);
-
-
-
-
-            $sysInfoArr = explode(':', $payment->getSysInfo());
-            if ( !in_array($params['pg_refund_id'], $sysInfoArr) ) {
-                $payment->setPaidSum($payment->getPaidSum() - $params['pg_net_amount']);
-                $payment->setStatus(
-                    $payment->getPaidSum() > 0 ? Payment::STATUS_PARTIAL_REFUND : Payment::STATUS_REFUND
-                );
-                $this->entityManager->persist($payment);
-                $this->entityManager->flush();
-                $event = new PaymentRefundEvent($payment, $params);
-                $this->eventDispatcher->dispatch(PaymentRefundEvent::NAME, $event);
-            }
-            $this->logger->info("refundPayment", $params);
-        } catch (\Exception $e) {
-            $response = [
+            $response = array(
                 'pg_status' => 'error',
                 'pg_error_description' => $e->getMessage(),
-            ];
-            $this->logger->error("refundPayment: ".$e->getMessage(), $params);
+            );
+
+            if (isset($payment) and $payment instanceof Payment) {
+                $event = new PaymentResultFailureEvent($payment, $parameters);
+                $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
+
+                if ((int) $parameters['pg_can_reject'] !== 0) {
+                    $payment->setStatus(Payment::STATUS_WAIT_REJECT);
+                    $response['pg_status'] = 'reject';
+                    $this->logger->error("Failed payment result action. Payment was rejected. Exception occurs: ".$e->getMessage(), $parameters);
+                } else {
+                    $payment->setStatus(Payment::STATUS_ERROR);
+                    $this->logger->error("Failed payment result action. Payment can't be rejected. Exception occurs: ".$e->getMessage(), $parameters);
+                }
+
+                $this->entityManager->flush();
+            } else {
+                $this->logger->error("Failed payment result action. Exception occurs: ".$e->getMessage(), $parameters);
+            }
+            return $this->makeResponse($url, $response);
         }
-        return $this->makeResponse($url, $response);
+
+        $payment
+            ->setPaidSum($parameters['pg_amount'])
+            ->setStatus(Payment::STATUS_PAID)
+        ;
+        $this->entityManager->flush();
+        $this->logger->info("Successful payment result action", $parameters);
+        return $this->makeResponse($url, array('pg_status' => 'ok', 'pg_description' =>'payment is accepted',));
     }
 
-    public function checkPaymentSuccess($url, $params)
+    /**
+     * Return data for platron check action
+     * @param $url
+     * @param $parameters
+     * @return array
+     */
+    public function getCheckPaymentResponseData($url, $parameters)
+    {
+        try {
+            $this->checkSignature($url, $parameters);
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount'), $parameters);
+            $payment = $this->getPaymentById($parameters['pg_payment_id']);
+
+            if ($payment->getInvoiceSum() != $parameters['pg_amount']) {
+                throw new PaymentServiceInvalidArgumentException("Payment invoice amount not equal to the expected amount");
+            }
+            if ($payment->getPurchase()->getId() !== (int) $parameters['pg_order_id'] ) {
+                throw new PaymentServiceInvalidArgumentException("Purchase for payment does not equal requested order");
+            }
+
+            $event = new PaymentCheckEvent($payment, $parameters);
+            $this->eventDispatcher->dispatch(PaymentCheckEvent::NAME, $event);
+            if ($event->getPayment()->getStatus() !== Payment::STATUS_NEW) {
+                throw new PaymentServiceInvalidArgumentException($event->getMessage() ?: "Payment was rejected by client");
+            }
+        } catch (\Exception $e) {
+            $this->logger->error("Failed payment check. Exception occurs: ".$e->getMessage(), $parameters);
+            return $this->makeResponse($url, array('pg_status' => 'rejected', 'pg_description' => $e->getMessage()));
+        }
+
+        $payment->setStatus(Payment::STATUS_WAIT_PAID);
+        $this->entityManager->flush();
+        $this->logger->info("Successful payment check action", $parameters);
+        return $this->makeResponse($url, array('pg_status' => 'ok', 'pg_timeout' => self::PAYMENT_TIMEOUT));
+    }
+
+    /**
+     * Return an url for purchase.
+     * @param array $parameters
+     * @return string
+     * @throws \Exception
+     */
+    public function getPayUrl(array $parameters)
+    {
+        try {
+            $normalizedParameters = $this->getNormalizedParameters($parameters);
+            $requestData = $this->makeRequest($this->apiUrlInit, $normalizedParameters);
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_redirect_url'), $requestData);
+            $this->checkSignature($this->apiUrlInit, $requestData);
+            $this->createPayment($parameters['sum'], $requestData['pg_payment_id'], $parameters['purchase_id']);
+        } catch (\Exception $e) {
+            $this->logger->error("Can't create platron pay url. Exception occurs: ".$e->getMessage(), $parameters);
+            throw $e;
+        }
+        $this->logger->info("Pay url was successfully generated: ".$requestData['pg_redirect_url'], array_merge($requestData, $parameters));
+        return $requestData['pg_redirect_url'];
+    }
+
+    /**
+     * Get payment with paid status by parameters
+     * @param $url
+     * @param $params
+     * @return bool|Payment
+     */
+    public function getSuccessPayment($url, $params)
     {
         try {
             $this->checkSignature($url, $params);
             $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id'), $params);
             $payment = $this->getPaymentById($params['pg_payment_id']);
-            if ( $payment->getStatus() != Payment::STATUS_PAID ) {
-                $payment->setStatus(Payment::STATUS_PAID);
-                $this->entityManager->flush();
-            }
-            $event = new PaymentResultSuccessEvent($payment, $params);
-            $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->logger->error("checkPaymentSuccess ".$e->getMessage(), $params);
-            throw new PaymentServiceInvalidArgumentException("requested payment had invalid params");
+            $this->logger->error("Error occurs while getting success payment: ".$e->getMessage(), $params);
+            return false;
         }
+
+        if ($payment->getStatus() != Payment::STATUS_PAID) {
+            $payment->setStatus(Payment::STATUS_PAID);
+            $this->entityManager->flush();
+        }
+
+        $event = new PaymentResultSuccessEvent($payment, $params);
+        $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
+
+        return $payment;
     }
 
-    public function checkPaymentFailure($url, $params)
+    /**
+     * Get payment with failure status by parameters
+     * @param $url
+     * @param $params
+     * @return bool|Payment
+     */
+    public function getFailurePayment($url, $params)
     {
         try {
             $this->checkSignature($url, $params);
             $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_failure_code', 'pg_failure_description'), $params);
             $payment = $this->getPaymentById($params['pg_payment_id']);
-            if ( $payment->getStatus() != Payment::STATUS_ERROR ) {
-                $payment->setStatus(Payment::STATUS_ERROR);
-                $this->entityManager->flush();
-            }
-            $event = new PaymentResultFailureEvent($payment, $params);
-            $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
         } catch (\Exception $e) {
-            $this->logger->error("checkPaymentFailure ".$e->getMessage(), $params);
-            throw new PaymentServiceInvalidArgumentException("requested payment had invalid params");
+            $this->logger->error("Error occurs while getting failure payment: ".$e->getMessage(), $params);
+            return false;
         }
-    }
 
-    public function getPaymentByParams(array $params)
-    {
-        return $this->getPaymentById($params['pg_payment_id']);
+        if ($payment->getStatus() != Payment::STATUS_ERROR) {
+            $payment->setStatus(Payment::STATUS_ERROR);
+            $this->entityManager->flush();
+        }
+
+        $event = new PaymentResultFailureEvent($payment, $params);
+        $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
+
+        return $payment;
     }
 }

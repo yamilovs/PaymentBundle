@@ -8,12 +8,24 @@ use Yamilovs\PaymentBundle\Entity\Payment;
 
 abstract class AbstractPaymentControllerEvent extends Event
 {
+    /** @var Payment */
     protected $payment;
+    /** @var Response */
     protected $response;
-    protected $responseView;
-    protected $responseParameters;
+    /** @var string */
+    protected $template;
+    /** @var array */
+    protected $templateParameters;
 
     public function __construct(Payment $payment)
+    {
+        $this->setPayment($payment);
+    }
+
+    /**
+     * @param Payment $payment
+     */
+    public function setPayment($payment)
     {
         $this->payment = $payment;
     }
@@ -43,34 +55,34 @@ abstract class AbstractPaymentControllerEvent extends Event
     }
 
     /**
-     * @param mixed $responseView
+     * @param string $template
      */
-    public function setResponseView($responseView)
+    public function setTemplate($template)
     {
-        $this->responseView = $responseView;
+        $this->template = $template;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getResponseView()
+    public function getTemplate()
     {
-        return $this->responseView;
+        return $this->template;
     }
 
     /**
-     * @param array $responseParameters
+     * @param array $templateParameters
      */
-    public function setResponseParameters(array $responseParameters)
+    public function setTemplateParameters(array $templateParameters)
     {
-        $this->responseParameters = $responseParameters;
+        $this->templateParameters = $templateParameters;
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function getResponseParameters()
+    public function getTemplateParameters()
     {
-        return $this->responseParameters;
+        return $this->templateParameters;
     }
 }
