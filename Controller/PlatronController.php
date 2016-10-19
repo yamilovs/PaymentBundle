@@ -4,18 +4,15 @@ namespace Yamilovs\PaymentBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\EventDispatcher\Event;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Yamilovs\PaymentBundle\Manager\PaymentServicePlatron;
 use Yamilovs\PaymentBundle\Component\HttpFoundation\XmlResponse;
 use Yamilovs\PaymentBundle\Event\PaymentControllerFailureEvent;
 use Yamilovs\PaymentBundle\Event\PaymentControllerSuccessEvent;
+use Yamilovs\PaymentBundle\Manager\PaymentServicePlatron;
 
 class PlatronController extends Controller
 {
     /**
-     * Проверка возможности платежа
-     *
+     * Return xml response for platron check action
      * @param Request $request
      * @return XmlResponse
      */
@@ -57,6 +54,7 @@ class PlatronController extends Controller
     }
 
     /**
+     * Action that will be shown after clicking on "return to store" link in platron service after successful payment
      * @param Request $request
      * @return mixed
      */
@@ -85,6 +83,7 @@ class PlatronController extends Controller
     }
 
     /**
+     * Action that will be shown after clicking on "return to store" link in platron service after unsuccessful payment
      * @param Request $request
      * @return mixed
      */
