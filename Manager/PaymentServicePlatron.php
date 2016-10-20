@@ -332,7 +332,7 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
             $payment = $this->getPaymentById($params['pg_payment_id']);
         } catch (\Exception $e) {
             $this->logger->error("Error occurs while getting success payment: " . $e->getMessage(), $params);
-            return false;
+            return null;
         }
 
         if ($payment->getStatus() != Payment::STATUS_PAID) {
@@ -360,7 +360,7 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
             $payment = $this->getPaymentById($params['pg_payment_id']);
         } catch (\Exception $e) {
             $this->logger->error("Error occurs while getting failure payment: " . $e->getMessage(), $params);
-            return false;
+            return null;
         }
 
         if ($payment->getStatus() != Payment::STATUS_ERROR) {
