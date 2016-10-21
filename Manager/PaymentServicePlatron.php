@@ -6,8 +6,7 @@ use anlutro\cURL\cURL;
 use Yamilovs\PaymentBundle\Entity\Payment;
 use Yamilovs\PaymentBundle\Event\PaymentCheckEvent;
 use Yamilovs\PaymentBundle\Event\PaymentRefundEvent;
-use Yamilovs\PaymentBundle\Event\PaymentResultFailureEvent;
-use Yamilovs\PaymentBundle\Event\PaymentResultSuccessEvent;
+use Yamilovs\PaymentBundle\Event\PaymentResultEvent;
 
 class PaymentServicePlatron extends AbstractPaymentService implements PaymentServiceInterface
 {
@@ -224,31 +223,39 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
             ));
         }
 
+        $response = array('pg_status' => 'ok', 'pg_description' => 'payment was accepted');
         if ((int)$parameters['pg_result'] === 1) {
-            $description = 'payment is accepted';
-            $payment
-                ->setPaidSum($parameters['pg_amount'])
-                ->setStatus(Payment::STATUS_PAID)
-            ;
-            $event = new PaymentResultSuccessEvent($payment, $parameters);
-            $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
-            $this->logger->info("Successful payment result action", $parameters);
-        } else {
-            $description = 'payment failure';
-            $event = new PaymentResultFailureEvent($payment, $parameters);
-            $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
-            if ((int)$parameters['pg_can_reject'] === 1) {
-                $payment->setStatus(Payment::STATUS_WAIT_REJECT);
-                $response['pg_status'] = 'reject';
-                $this->logger->error("Failed payment result action. Payment was rejected", $parameters);
+            if ($payment->getInvoiceSum() == $parameters['pg_amount']) {
+                $payment
+                    ->setPaidSum($parameters['pg_amount'])
+                    ->setStatus(Payment::STATUS_PAID)
+                ;
+                $this->logger->info("Successful payment result action", $parameters);
             } else {
-                $payment->setStatus(Payment::STATUS_ERROR);
-                $this->logger->error("Failed payment result action. Payment failure", $parameters);
+                if ((int)$parameters['pg_can_reject'] === 1) {
+                    $payment->setStatus(Payment::STATUS_WAIT_REJECT);
+                    $response = [
+                        'pg_status' => 'reject',
+                        'pg_description' => 'payment was rejected'
+                    ];
+                    $this->logger->error("Payment was rejected", $parameters);
+                } else {
+                    $payment
+                        ->setPaidSum($parameters['pg_amount'])
+                        ->setStatus(Payment::STATUS_PARTIAL_PAID)
+                    ;
+                    $this->logger->error("Failure. Partial paid", $parameters);
+                }
             }
-            $this->logger->error("Failure payment result action", $parameters);
+        } else {
+            $response['pg_description'] = 'payment failure';
+            $payment->setStatus(Payment::STATUS_ERROR);
+            $this->logger->error("Failed payment result action. Payment failure", $parameters);
         }
         $this->entityManager->flush();
-        return $this->makeResponse($url, array('pg_status' => 'ok', 'pg_description' => $description));
+        $event = new PaymentResultEvent($payment, $parameters);
+        $this->eventDispatcher->dispatch(PaymentResultEvent::NAME, $event);
+        return $this->makeResponse($url, $response);
     }
 
     /**
