@@ -212,52 +212,40 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
         try {
             $this->checkSignature($url, $parameters);
             $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_result', 'pg_can_reject'), $parameters);
-            if ((int)$parameters['pg_result'] !== 1) {
-                throw new PaymentServiceInvalidArgumentException("Payment result action return failure status.");
-            }
-
             $payment = $this->getPaymentById($parameters['pg_payment_id']);
             if ($payment->getInvoiceSum() != $parameters['pg_amount']) {
                 throw new PaymentServiceInvalidArgumentException("Payment invoice amount not equal to the expected amount");
             }
-
-            $event = new PaymentResultSuccessEvent($payment, $parameters);
-            $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
-            if ($event->getPayment()->getStatus() == Payment::STATUS_ERROR) {
-                throw new PaymentServiceInvalidArgumentException($event->getMessage() ?: "Payment status is error, after successful event");
-            }
         } catch (\Exception $e) {
-            $response = array(
+            $this->logger->error("Failed payment result action. Exception occurs: " . $e->getMessage(), $parameters);
+            return $this->makeResponse($url, array(
                 'pg_status' => 'error',
-                'pg_error_description' => $e->getMessage(),
-            );
-
-            if (isset($payment) and $payment instanceof Payment) {
-                $event = new PaymentResultFailureEvent($payment, $parameters);
-                $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
-
-                if ((int)$parameters['pg_can_reject'] !== 0) {
-                    $payment->setStatus(Payment::STATUS_WAIT_REJECT);
-                    $response['pg_status'] = 'reject';
-                    $this->logger->error("Failed payment result action. Payment was rejected. Exception occurs: " . $e->getMessage(), $parameters);
-                } else {
-                    $payment->setStatus(Payment::STATUS_ERROR);
-                    $this->logger->error("Failed payment result action. Payment can't be rejected. Exception occurs: " . $e->getMessage(), $parameters);
-                }
-
-                $this->entityManager->flush();
-            } else {
-                $this->logger->error("Failed payment result action. Exception occurs: " . $e->getMessage(), $parameters);
-            }
-            return $this->makeResponse($url, $response);
+                'pg_error_description' => $e->getMessage()
+            ));
         }
 
-        $payment
-            ->setPaidSum($parameters['pg_amount'])
-            ->setStatus(Payment::STATUS_PAID);
+        if ((int)$parameters['pg_result'] === 1) {
+            $description = 'payment is accepted';
+            $payment->setPaidSum($parameters['pg_amount'])->setStatus(Payment::STATUS_PAID);
+            $event = new PaymentResultSuccessEvent($payment, $parameters);
+            $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
+            $this->logger->info("Successful payment result action", $parameters);
+        } else {
+            $description = 'payment failure';
+            $event = new PaymentResultFailureEvent($payment, $parameters);
+            $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
+            if ((int)$parameters['pg_can_reject'] === 1) {
+                $payment->setStatus(Payment::STATUS_WAIT_REJECT);
+                $response['pg_status'] = 'reject';
+                $this->logger->error("Failed payment result action. Payment was rejected", $parameters);
+            } else {
+                $payment->setStatus(Payment::STATUS_ERROR);
+                $this->logger->error("Failed payment result action. Payment failure", $parameters);
+            }
+            $this->logger->erro("Failure payment result action", $parameters);
+        }
         $this->entityManager->flush();
-        $this->logger->info("Successful payment result action", $parameters);
-        return $this->makeResponse($url, array('pg_status' => 'ok', 'pg_description' => 'payment is accepted',));
+        return $this->makeResponse($url, array('pg_status' => 'ok', 'pg_description' => $description));
     }
 
     /**
