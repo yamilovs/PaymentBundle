@@ -226,7 +226,10 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
 
         if ((int)$parameters['pg_result'] === 1) {
             $description = 'payment is accepted';
-            $payment->setPaidSum($parameters['pg_amount'])->setStatus(Payment::STATUS_PAID);
+            $payment
+                ->setPaidSum($parameters['pg_amount'])
+                ->setStatus(Payment::STATUS_PAID)
+            ;
             $event = new PaymentResultSuccessEvent($payment, $parameters);
             $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
             $this->logger->info("Successful payment result action", $parameters);
@@ -242,7 +245,7 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
                 $payment->setStatus(Payment::STATUS_ERROR);
                 $this->logger->error("Failed payment result action. Payment failure", $parameters);
             }
-            $this->logger->erro("Failure payment result action", $parameters);
+            $this->logger->error("Failure payment result action", $parameters);
         }
         $this->entityManager->flush();
         return $this->makeResponse($url, array('pg_status' => 'ok', 'pg_description' => $description));
