@@ -338,8 +338,8 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
             $this->entityManager->flush();
         }
 
-        $event = new PaymentResultSuccessEvent($payment, $params);
-        $this->eventDispatcher->dispatch(PaymentResultSuccessEvent::NAME, $event);
+        $event = new PaymentResultEvent($payment, $params);
+        $this->eventDispatcher->dispatch(PaymentResultEvent::NAME, $event);
 
         return $payment;
     }
@@ -366,8 +366,8 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
             $this->entityManager->flush();
         }
 
-        $event = new PaymentResultFailureEvent($payment, $params);
-        $this->eventDispatcher->dispatch(PaymentResultFailureEvent::NAME, $event);
+        $event = new PaymentResultEvent($payment, $params);
+        $this->eventDispatcher->dispatch(PaymentResultEvent::NAME, $event);
 
         return $payment;
     }
