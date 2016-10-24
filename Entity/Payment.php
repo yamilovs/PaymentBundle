@@ -14,8 +14,8 @@ class Payment
     const STATUS_PARTIAL_REFUND = 5;
     const STATUS_REFUND         = 6;
     const STATUS_PARTIAL_PAID   = 7;
-    const STATUS_ERROR          = 9;
-    const STATUS_PAID           = 10;
+    const STATUS_ERROR          = 8;
+    const STATUS_PAID           = 9;
 
     /**
      * @var int

@@ -305,8 +305,8 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
         try {
             $normalizedParameters = $this->getNormalizedParameters($parameters);
             $requestData = $this->makeRequest($this->apiUrlInit, $normalizedParameters);
-            $this->checkRequiredParameters(array('pg_payment_id', 'pg_redirect_url'), $requestData);
             $this->checkSignature($this->apiUrlInit, $requestData);
+            $this->checkRequiredParameters(array('pg_payment_id', 'pg_redirect_url'), $requestData);
             $this->createPayment($parameters['sum'], $requestData['pg_payment_id'], $parameters['purchase_id']);
         } catch (\Exception $e) {
             $this->logger->error("Can't create platron pay url. Exception occurs: " . $e->getMessage(), $parameters);
