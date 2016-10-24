@@ -2,16 +2,16 @@
 
 namespace Yamilovs\PaymentBundle\Manager;
 
-use Doctrine\ORM\EntityManager;
-use Monolog\Logger;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Yamilovs\PaymentBundle\Entity\Payment;
 
 abstract class AbstractPaymentService
 {
-    /** @var Logger */
+    /** @var LoggerInterface */
     protected $logger;
-    /** @var  EntityManager */
+    /** @var  EntityManagerInterface */
     protected $entityManager;
     /** @var  EventDispatcherInterface */
     protected $eventDispatcher;
@@ -24,12 +24,12 @@ abstract class AbstractPaymentService
 
     abstract public function getAlias();
 
-    public final function setLogger(Logger $logger)
+    public final function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    public final function setEntityManager(EntityManager $entityManager)
+    public final function setEntityManager(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
