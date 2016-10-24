@@ -23,8 +23,8 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(5, Payment::STATUS_PARTIAL_REFUND);
         $this->assertEquals(6, Payment::STATUS_REFUND);
         $this->assertEquals(7, Payment::STATUS_PARTIAL_PAID);
-        $this->assertEquals(9, Payment::STATUS_ERROR);
-        $this->assertEquals(10, Payment::STATUS_PAID);
+        $this->assertEquals(8, Payment::STATUS_ERROR);
+        $this->assertEquals(9, Payment::STATUS_PAID);
     }
 
     public function testPaymentType()
