@@ -50,7 +50,7 @@ abstract class AbstractPaymentService
         $missingParameters = array_diff($requiredParameters, array_keys($parameters));
         if ($missingParameters) {
             throw new PaymentServiceInvalidArgumentException("Some required parameters does not exists. Has: " . implode(", ", array_keys($parameters)) . ". 
-            Also need: " . implode(", ", array_keys($missingParameters)));
+            Also need: " . implode(", ", $missingParameters));
         }
     }
 
