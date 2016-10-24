@@ -9,9 +9,9 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
     /**
      * @return Payment
      */
-    protected function getPayment()
+    private function getPayment()
     {
-        return $this->getMockForAbstractClass('Yamilovs\PaymentBundle\Entity\Payment');
+        return $this->getMockBuilder('Yamilovs\PaymentBundle\Entity\Payment')->getMockForAbstractClass();
     }
 
     public function testCheckStatusConstants()
