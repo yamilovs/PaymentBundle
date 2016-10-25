@@ -212,9 +212,6 @@ class PaymentServicePlatron extends AbstractPaymentService implements PaymentSer
             $this->checkSignature($url, $parameters);
             $this->checkRequiredParameters(array('pg_payment_id', 'pg_order_id', 'pg_amount', 'pg_result', 'pg_can_reject'), $parameters);
             $payment = $this->getPaymentById($parameters['pg_payment_id']);
-            if ($payment->getInvoiceSum() != $parameters['pg_amount']) {
-                throw new PaymentServiceInvalidArgumentException("Payment invoice amount not equal to the expected amount");
-            }
         } catch (\Exception $e) {
             $this->logger->error("Failed payment result action. Exception occurs: " . $e->getMessage(), $parameters);
             return $this->makeResponse($url, array(
