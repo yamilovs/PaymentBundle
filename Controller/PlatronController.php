@@ -77,7 +77,7 @@ class PlatronController extends Controller
         }
 
         return $this->render(
-            $event->getTemplate() ?: "YamilovsPaymentBundle:Platron:success.html.twig",
+            $event->getTemplate() ?: $this->getParameter('yamilovs_payment.templates.success'),
             $event->getTemplateParameters() ?: array('payment' => $payment)
         );
     }
@@ -106,7 +106,7 @@ class PlatronController extends Controller
         }
 
         return $this->render(
-            $event->getTemplate() ?: "YamilovsPaymentBundle:Platron:failure.html.twig",
+            $event->getTemplate() ?: $this->getParameter('yamilovs_payment.templates.failure'),
             $event->getTemplateParameters() ?: array('payment' => $payment)
         );
     }

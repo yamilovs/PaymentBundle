@@ -75,6 +75,16 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('templates')
+                    ->children()
+                        ->scalarNode('success')
+                            ->defaultValue('YamilovsPaymentBundle:Payment:success.html.twig')
+                        ->end()
+                        ->scalarNode('failure')
+                            ->defaultValue('YamilovsPaymentBundle:Payment:failure.html.twig')
+                        ->end()
+                    ->end()
+                ->end()
             ->end()
         ;
 
