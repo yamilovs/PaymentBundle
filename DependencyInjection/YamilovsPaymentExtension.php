@@ -33,5 +33,7 @@ class YamilovsPaymentExtension extends Extension
         $container->setParameter($this->getAlias().".services.platron.salt", $config['services']['platron']['salt']);
         $container->setParameter($this->getAlias().".services.platron.api_url_init", $config['services']['platron']['api_url_init']);
         $container->setParameter($this->getAlias().".products", $config['products']);
+        $container->setParameter($this->getAlias().".templates.success", $config['templates']['success']);
+        $container->setParameter($this->getAlias().".templates.failure", $config['templates']['failure']);
     }
 }
