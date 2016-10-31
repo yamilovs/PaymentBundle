@@ -76,6 +76,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->arrayNode('templates')
+                    ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('success')
                             ->defaultValue('YamilovsPaymentBundle:Payment:success.html.twig')
