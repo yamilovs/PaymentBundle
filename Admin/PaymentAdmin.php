@@ -59,6 +59,7 @@ class PaymentAdmin extends AbstractAdmin
                 ->add('status', ChoiceType::class, [
                     'label' => 'yamilovs.payment.admin.label.status',
                     'choices' => Payment::getStatuses(),
+                    'translation_domain' => 'SonataAdminBundle',
                 ])
                 ->add('paymentType', ChoiceType::class, [
                     'label' => 'yamilovs.payment.admin.label.payment_type',

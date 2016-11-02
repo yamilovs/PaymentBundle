@@ -62,6 +62,42 @@
                 <source>yamilovs.payment.admin.with.data</source>
                 <target>Данные платежа</target>
             </trans-unit>
+            <trans-unit id="16">
+                <source>yamilovs.payment.admin.value.status_new</source>
+                <target>Новый</target>
+            </trans-unit>
+            <trans-unit id="17">
+                <source>yamilovs.payment.admin.value.status_wait_paid</source>
+                <target>Ожидает оплаты</target>
+            </trans-unit>
+            <trans-unit id="18">
+                <source>yamilovs.payment.admin.value.status_wait_reject</source>
+                <target>Ожидает отклонения</target>
+            </trans-unit>
+            <trans-unit id="19">
+                <source>yamilovs.payment.admin.value.status_reject</source>
+                <target>Отклонен</target>
+            </trans-unit>
+            <trans-unit id="20">
+                <source>yamilovs.payment.admin.value.status_partial_refund</source>
+                <target>Частично возвращен</target>
+            </trans-unit>
+            <trans-unit id="21">
+                <source>yamilovs.payment.admin.value.status_refund</source>
+                <target>Возвращен</target>
+            </trans-unit>
+            <trans-unit id="22">
+                <source>yamilovs.payment.admin.value.status_partial_paid</source>
+                <target>Частично оплачен</target>
+            </trans-unit>
+            <trans-unit id="23">
+                <source>yamilovs.payment.admin.value.status_error</source>
+                <target>Ошибка при оплате</target>
+            </trans-unit>
+            <trans-unit id="24">
+                <source>yamilovs.payment.admin.value.status_paid</source>
+                <target>Оплачен</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
