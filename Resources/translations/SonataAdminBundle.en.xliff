@@ -50,6 +50,42 @@
                 <source>yamilovs.payment.admin.with.data</source>
                 <target>Payment data</target>
             </trans-unit>
+            <trans-unit id="13">
+                <source>yamilovs.payment.admin.value.status_new</source>
+                <target>New</target>
+            </trans-unit>
+            <trans-unit id="14">
+                <source>yamilovs.payment.admin.value.status_wait_paid</source>
+                <target>Waiting for payment</target>
+            </trans-unit>
+            <trans-unit id="15">
+                <source>yamilovs.payment.admin.value.status_wait_reject</source>
+                <target>Waiting for reject</target>
+            </trans-unit>
+            <trans-unit id="16">
+                <source>yamilovs.payment.admin.value.status_reject</source>
+                <target>Rejected</target>
+            </trans-unit>
+            <trans-unit id="17">
+                <source>yamilovs.payment.admin.value.status_partial_refund</source>
+                <target>Partial refunded</target>
+            </trans-unit>
+            <trans-unit id="18">
+                <source>yamilovs.payment.admin.value.status_refund</source>
+                <target>Refunded</target>
+            </trans-unit>
+            <trans-unit id="19">
+                <source>yamilovs.payment.admin.value.status_partial_paid</source>
+                <target>Partial paid</target>
+            </trans-unit>
+            <trans-unit id="20">
+                <source>yamilovs.payment.admin.value.status_error</source>
+                <target>Error</target>
+            </trans-unit>
+            <trans-unit id="21">
+                <source>yamilovs.payment.admin.value.status_paid</source>
+                <target>Paid</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

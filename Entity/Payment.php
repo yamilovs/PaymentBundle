@@ -306,15 +306,15 @@ class Payment
     public static function getStatuses()
     {
         return [
-            self::STATUS_NEW            => 'Новый',
-            self::STATUS_WAIT_PAID      => 'Ожидает оплаты',
-            self::STATUS_WAIT_REJECT    => 'Ожидает отклонения',
-            self::STATUS_REJECT         => 'Отклонен',
-            self::STATUS_PARTIAL_REFUND => 'Частично возвращен',
-            self::STATUS_REFUND         => 'Возвращен',
-            self::STATUS_PARTIAL_PAID   => 'Частично оплачен',
-            self::STATUS_ERROR          => 'Ошибка при оплате',
-            self::STATUS_PAID           => 'Оплачен',
+            'yamilovs.payment.admin.value.status_new'               => self::STATUS_NEW,
+            'yamilovs.payment.admin.value.status_wait_paid'         => self::STATUS_WAIT_PAID,
+            'yamilovs.payment.admin.value.status_wait_reject'       => self::STATUS_WAIT_REJECT,
+            'yamilovs.payment.admin.value.status_reject'            => self::STATUS_REJECT,
+            'yamilovs.payment.admin.value.status_partial_refund'    => self::STATUS_PARTIAL_REFUND,
+            'yamilovs.payment.admin.value.status_refund'            => self::STATUS_REFUND,
+            'yamilovs.payment.admin.value.status_partial_paid'      => self::STATUS_PARTIAL_PAID,
+            'yamilovs.payment.admin.value.status_error'             => self::STATUS_ERROR,
+            'yamilovs.payment.admin.value.status_paid'              => self::STATUS_PAID,
         ];
     }
 }
