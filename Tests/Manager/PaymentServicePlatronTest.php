@@ -2,6 +2,9 @@
 
 namespace Yamilovs\PaymentBundle\Tests\Manager;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Yamilovs\PaymentBundle\Manager\PaymentServicePlatron;
 
 class PaymentServicePlatronTest extends \PHPUnit_Framework_TestCase
@@ -17,7 +20,7 @@ class PaymentServicePlatronTest extends \PHPUnit_Framework_TestCase
     private function getPlatronService()
     {
         /** @var PaymentServicePlatron $platronService */
-        $platronService = $this->getMockBuilder('Yamilovs\PaymentBundle\Manager\PaymentServicePlatron')
+        $platronService = $this->getMockBuilder(PaymentServicePlatron::class)
             ->setConstructorArgs(
                 array($this->getHostName(), $this->merchantId, $this->secretKey, $this->salt, $this->apiUrlInit)
             )
@@ -37,17 +40,17 @@ class PaymentServicePlatronTest extends \PHPUnit_Framework_TestCase
 
     private function getMockMonolog()
     {
-        return $this->getMockBuilder('Psr\Log\LoggerInterface')->getMock();
+        return $this->getMockBuilder(LoggerInterface::class)->getMock();
     }
 
     private function getMockEntityManager()
     {
-        return $this->getMockBuilder('Doctrine\ORM\EntityManagerInterface')->getMock();
+        return $this->getMockBuilder(EntityManagerInterface::class)->getMock();
     }
 
     private function getMockEventDispatcher()
     {
-        return $this->getMockBuilder('Symfony\Component\EventDispatcher\EventDispatcherInterface')->getMock();
+        return $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
     }
 
     /**
