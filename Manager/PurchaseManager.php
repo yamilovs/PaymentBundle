@@ -7,7 +7,6 @@ use Yamilovs\PaymentBundle\Entity\Purchase;
 
 class PurchaseManager
 {
-    protected $products;
     protected $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager, array $products)
@@ -62,12 +61,12 @@ class PurchaseManager
      */
     private function getProductConfig($productAlias, $entity)
     {
-        if ( !array_key_exists($productAlias, $this->products)) {
-            throw new PurchaseInvalidArgumentException("product don't exists");
+        if (!array_key_exists($productAlias, $this->products)) {
+            throw new PurchaseInvalidArgumentException("Product alias '$productAlias' doesn't has a configuration");
         }
         $productConfig = $this->products[$productAlias];
-        if ( !$entity instanceof $productConfig['class'] ) {
-            throw new PurchaseInvalidArgumentException("not valid class");
+        if (!$entity instanceof $productConfig['class'] ) {
+            throw new PurchaseInvalidArgumentException("Product object doesn't equal configured class");
         }
         return $productConfig;
     }
@@ -80,9 +79,9 @@ class PurchaseManager
      */
     private function primaryKeyGetter($productConfig, $entity)
     {
-        $primaryKeyGetter = 'get'.strtoupper($productConfig['primaryKey']);
-        if ( !method_exists($entity, $primaryKeyGetter)) {
-            throw new PurchaseInvalidArgumentException("method do not exists");
+        $primaryKeyGetter = 'get'.ucfirst($productConfig['primaryKey']);
+        if (!method_exists($entity, $primaryKeyGetter)) {
+            throw new PurchaseInvalidArgumentException("Method '$primaryKeyGetter' doesn't found in class '{$productConfig['class']}'");
         }
         return $primaryKeyGetter;
     }

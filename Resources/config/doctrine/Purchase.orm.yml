@@ -17,7 +17,6 @@ Yamilovs\PaymentBundle\Entity\Purchase:
 
     oneToMany:
         payments:
-            orderBy: { 'ordering': 'ASC' }
             targetEntity: Payment
             mappedBy: purchase
 

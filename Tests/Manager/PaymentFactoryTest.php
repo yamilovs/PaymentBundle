@@ -14,7 +14,7 @@ class PaymentFactoryTest extends \PHPUnit_Framework_TestCase
     private function getPaymentFactory()
     {
         /** @var PaymentFactory $factory */
-        $factory = $this->getMockBuilder('Yamilovs\PaymentBundle\Manager\PaymentFactory')
+        $factory = $this->getMockBuilder(PaymentFactory::class)
             ->setConstructorArgs(
                 array(PaymentServicePlatron::ALIAS)
             )
@@ -26,7 +26,7 @@ class PaymentFactoryTest extends \PHPUnit_Framework_TestCase
 
     private function getPlatronService()
     {
-        return $this->getMockBuilder('Yamilovs\PaymentBundle\Manager\PaymentServicePlatron')
+        return $this->getMockBuilder(PaymentServicePlatron::class)
             ->disableOriginalConstructor()
             ->getMockForAbstractClass()
         ;
