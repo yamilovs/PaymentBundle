@@ -11,20 +11,18 @@ Yamilovs\PaymentBundle\Entity\Payment:
     fields:
         paymentType:
             type: string
-            length: 255
         paymentId:
             type: string
-            length: 255
         status:
             type: integer
         invoiceSum:
             type: decimal
             precision: 10
-            scale: '2'
+            scale: 2
         paidSum:
             type: decimal
             precision: 10
-            scale: '2'
+            scale: 2
             nullable: true
         sysInfo:
             type: text
@@ -38,9 +36,7 @@ Yamilovs\PaymentBundle\Entity\Payment:
     manyToOne:
         purchase:
             targetEntity: Purchase
-            joinColumn:
-                name: purchase_id
-                referencedColumnName: id
+            inversedBy: payments
 
     lifecycleCallbacks:
         prePersist: [ prePersist ]
